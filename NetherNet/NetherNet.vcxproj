@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{30febe19-a688-4175-a024-b29aef89b565}</ProjectGuid>
+    <RootNamespace>NetherNet</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <AdditionalIncludeDirectories>D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>webrtc.lib;libyuv_internal.lib;boringssl.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="NetherNet.cpp" />
+    <ClCompile Include="NetherNet\connection\NetworkSession.cpp" />
+    <ClCompile Include="NetherNet\connection\SimpleNetworkInterfaceImpl.cpp" />
+    <ClCompile Include="NetherNet\encryption\AesContext.cpp" />
+    <ClCompile Include="NetherNet\encryption\OpenSSLAesAdapter.cpp" />
+    <ClCompile Include="NetherNet\encryption\OpenSSLInterface.cpp" />
+    <ClCompile Include="NetherNet\HNetherNet.cpp" />
+    <ClCompile Include="NetherNet\network\NetworkSessionManager.cpp" />
+    <ClCompile Include="NetherNet\network\signaling\CandidateAdd.cpp" />
+    <ClCompile Include="NetherNet\network\signaling\ConnectError.cpp" />
+    <ClCompile Include="NetherNet\network\signaling\ConnectResponse.cpp" />
+    <ClCompile Include="NetherNet\threadding\LanThreadManager.cpp" />
+    <ClCompile Include="NetherNet\threadding\RtcThreadManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="NetherNet\connection\NetherNetTransportServerConfiguration.hpp" />
+    <ClInclude Include="NetherNet\connection\NetworkSession.hpp" />
+    <ClInclude Include="NetherNet\connection\SimpleNetworkInterfaceImpl.hpp" />
+    <ClInclude Include="NetherNet\encryption\AesAdapter.hpp" />
+    <ClInclude Include="NetherNet\encryption\AesContext.hpp" />
+    <ClInclude Include="NetherNet\encryption\OpenSSLAesAdapter.hpp" />
+    <ClInclude Include="NetherNet\encryption\OpenSSLInterface.hpp" />
+    <ClInclude Include="NetherNet\HNetherNet.hpp" />
+    <ClInclude Include="NetherNet\network\NetworkID.hpp" />
+    <ClInclude Include="NetherNet\network\NetworkSessionManager.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryMessagePacket.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryPacket.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryPacketHeader.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryPacketType.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryRequestPacket.hpp" />
+    <ClInclude Include="NetherNet\network\packets\DiscoveryResponsePacket.hpp" />
+    <ClInclude Include="NetherNet\network\packets\ESessionError.hpp" />
+    <ClInclude Include="NetherNet\network\SignalingChannelId.hpp" />
+    <ClInclude Include="NetherNet\network\signaling\CandidateAdd.hpp" />
+    <ClInclude Include="NetherNet\network\signaling\ConnectError.hpp" />
+    <ClInclude Include="NetherNet\network\signaling\ConnectRequest.hpp" />
+    <ClInclude Include="NetherNet\network\signaling\ConnectResponse.hpp" />
+    <ClInclude Include="NetherNet\threadding\LanThreadManager.hpp" />
+    <ClInclude Include="NetherNet\threadding\RtcThreadManager.hpp" />
+    <ClInclude Include="NetherNet\types\Errors.hpp" />
+    <ClInclude Include="NetherNet\types\Strings.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
