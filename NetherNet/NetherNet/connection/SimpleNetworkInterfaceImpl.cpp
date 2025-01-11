@@ -52,6 +52,20 @@ namespace NetherNet {
 		}
 	}
 
+	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryResponsePacket* packet) {
+		if (mRecvCallBack && packet->SenderId() != mReceiverId) {
+			NetworkID senderId = packet->SenderId();
+			auto sockAddr = addr->ToString();
+			NetherNet::NetherNetTransport_LogMessage(
+				5,
+				"Recieved discovery response from \"%s\" with network id \"%llu\"",
+				sockAddr,
+				senderId);
+
+			//TODO: invoke callback
+		}
+	}
+
 	void SimpleNetworkInterfaceImpl::ReceiveFromLanSignalingChannel(NetworkID remoteId, const std::string& message, bool a3, SignalingChannelId channelId) {
 		::NetherNet::NetherNetTransport_LogMessage(
 			4,

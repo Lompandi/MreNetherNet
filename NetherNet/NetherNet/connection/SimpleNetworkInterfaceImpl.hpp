@@ -7,6 +7,7 @@
 #include <api/peer_connection_interface.h>
 
 #include "NetherNetTransportServerConfiguration.hpp"
+#include "INetherNetTransportInterfaceCallbacks.hpp"
 
 #include "../network/NetworkSessionManager.hpp"
 #include "../network/packets/DiscoveryMessagePacket.hpp"
@@ -53,7 +54,8 @@ namespace NetherNet {
 
 		void UpdateConfigWithRelayToken(webrtc::PeerConnectionInterface::RTCConfiguration* pRtcConfig);
 	private:
-		NetworkID								mRemoteId;				// this + 0x004
+		NetworkID								mRemoteId;				// this + 0x008
+		INetherNetTransportInterfaceCallbacks*  mRecvCallBack;			// this + 0x010
 		NetworkID								mReceiverId;			// this + 0x018
 		std::shared_ptr<NetworkSessionManager>	mNetworkSessionMgr;		// this + 0x020
 		std::mutex								mConnectionMtx;			// this + 0x030

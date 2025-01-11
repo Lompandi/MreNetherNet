@@ -53,6 +53,10 @@ namespace NetherNet {
 		}
 	}
 
+	void LanThreadManager::CreateEncryptedBroadcastSocket() {
+
+	}
+
 	LanThreadManager& getLanThread() {
 		return g_LanThread;
 	}

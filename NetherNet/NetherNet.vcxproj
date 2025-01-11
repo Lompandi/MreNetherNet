@@ -146,10 +146,12 @@
     <ClCompile Include="NetherNet\network\signaling\CandidateAdd.cpp" />
     <ClCompile Include="NetherNet\network\signaling\ConnectError.cpp" />
     <ClCompile Include="NetherNet\network\signaling\ConnectResponse.cpp" />
+    <ClCompile Include="NetherNet\network\tasks\parse_config.cpp" />
     <ClCompile Include="NetherNet\threadding\LanThreadManager.cpp" />
     <ClCompile Include="NetherNet\threadding\RtcThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NetherNet\connection\INetherNetTransportInterfaceCallbacks.hpp" />
     <ClInclude Include="NetherNet\connection\NetherNetTransportServerConfiguration.hpp" />
     <ClInclude Include="NetherNet\connection\NetworkSession.hpp" />
     <ClInclude Include="NetherNet\connection\SimpleNetworkInterfaceImpl.hpp" />
@@ -172,6 +174,7 @@
     <ClInclude Include="NetherNet\network\signaling\ConnectError.hpp" />
     <ClInclude Include="NetherNet\network\signaling\ConnectRequest.hpp" />
     <ClInclude Include="NetherNet\network\signaling\ConnectResponse.hpp" />
+    <ClInclude Include="NetherNet\network\tasks\parse_config.hpp" />
     <ClInclude Include="NetherNet\threadding\LanThreadManager.hpp" />
     <ClInclude Include="NetherNet\threadding\RtcThreadManager.hpp" />
     <ClInclude Include="NetherNet\types\Errors.hpp" />

@@ -54,6 +54,9 @@
     <ClCompile Include="NetherNet\network\signaling\CandidateAdd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetherNet\network\tasks\parse_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetherNet\encryption\AesContext.hpp">
@@ -132,6 +135,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetherNet\encryption\AesAdapter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetherNet\network\tasks\parse_config.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetherNet\connection\INetherNetTransportInterfaceCallbacks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
