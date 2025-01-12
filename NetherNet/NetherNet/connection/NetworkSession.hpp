@@ -73,11 +73,11 @@ namespace NetherNet {
 		MyStatsObserver						mStatsObserver;			 //this + 0x60
 		webrtc::DataChannelInterface* mUnreliableChannelInterface;	 //this + 0xD8
 		std::vector<rtc::CopyOnWriteBuffer>	mUnreliablePackets;		 //this + 0xE0
-		uint32_t							mUnreliableChannelState; //this + 0xF8
+		webrtc::DataChannelInterface::DataState mUnreliableChannelState; //this + 0xF8
 		webrtc::DataChannelInterface*		mReliableChannelInterface;	//this + 0x100
 		std::vector<rtc::CopyOnWriteBuffer>	mReliablePackets;				//this + 0x108
-		uint32_t							mReliableChannelState;
-		uint32_t							mConnectionFlag;		 //this + 0x208
+		webrtc::DataChannelInterface::DataState	mReliableChannelState;
+		uint32_t								mConnectionFlag;		 //this + 0x208
 		/* 
 		Connection flag format: 
 		Bits:

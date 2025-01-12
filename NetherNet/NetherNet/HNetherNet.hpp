@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <system_error>
+#include <variant>
 
 #include "types/Errors.hpp"
 #include "encryption/AesContext.hpp"
@@ -13,7 +14,8 @@
 #include "network/signaling/ConnectResponse.hpp"
 #include "network/signaling/ConnectError.hpp"
 #include "network/signaling/CandidateAdd.hpp"
-#include <variant>
+
+#include "logging/LogSeverity.hpp"
 
 namespace NetherNet {
 	ErrorOr<std::vector<uint8_t>, std::error_code> CreateKey(uint64_t id);
@@ -28,5 +30,5 @@ namespace NetherNet {
 		::NetherNet::CandidateAdd>> 
 	TryParseSignalingMessage(const std::string& message);
 
-	extern int g_LogServerity;
+	extern LogSeverity g_LogServerity;
 }

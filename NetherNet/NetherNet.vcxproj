@@ -147,6 +147,7 @@
     <ClCompile Include="NetherNet\encryption\OpenSSLInterface.cpp" />
     <ClCompile Include="NetherNet\HNetherNet.cpp" />
     <ClCompile Include="NetherNet\network\NetworkSessionManager.cpp" />
+    <ClCompile Include="NetherNet\network\packets\DiscoveryResponsePacket.cpp" />
     <ClCompile Include="NetherNet\network\signaling\CandidateAdd.cpp" />
     <ClCompile Include="NetherNet\network\signaling\ConnectError.cpp" />
     <ClCompile Include="NetherNet\network\tasks\parse_config.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="NetherNet\encryption\OpenSSLAesAdapter.hpp" />
     <ClInclude Include="NetherNet\encryption\OpenSSLInterface.hpp" />
     <ClInclude Include="NetherNet\HNetherNet.hpp" />
+    <ClInclude Include="NetherNet\logging\LogSeverity.hpp" />
     <ClInclude Include="NetherNet\network\NetworkID.hpp" />
     <ClInclude Include="NetherNet\network\NetworkSessionManager.hpp" />
     <ClInclude Include="NetherNet\network\packets\DiscoveryMessagePacket.hpp" />

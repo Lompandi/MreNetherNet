@@ -147,15 +147,18 @@ namespace NetherNet {
 
 	void NetworkSession::UpdateDataChannelStates() {
 		if (mReliableChannelInterface != 0)
-			mReliableChannelState = 0; /*TODO: mReliableChannelState = ...*/
+			mReliableChannelState = mReliableChannelInterface->state();
 		else
-			mReliableChannelState = 3;
+			mReliableChannelState = webrtc::DataChannelInterface::DataState::kClosed;
 
 		if (mUnreliableChannelInterface != 0)
-			mUnreliableChannelState = 0; /*TODO: mUnreliableChannelState = ...*/
+			mUnreliableChannelState = mUnreliableChannelInterface->state(); 
+		else
+			mUnreliableChannelState = webrtc::DataChannelInterface::DataState::kClosed;
 		
-		if (mReliableChannelState == 1 && mUnreliableChannelState == 1)
-			mNetworkSessionMgr->mSimpleNetworkInterface->NotifyOnSessionOpen();
+		if (mReliableChannelState == webrtc::DataChannelInterface::DataState::kOpen
+			&& mUnreliableChannelState == webrtc::DataChannelInterface::DataState::kOpen)
+			mNetworkSessionMgr->mSimpleNetworkInterface->NotifyOnSessionOpen(mRemoteID);
 	}
 
 	void NetworkSession::OnIceCandidate(webrtc::IceCandidateInterface const* iface) {

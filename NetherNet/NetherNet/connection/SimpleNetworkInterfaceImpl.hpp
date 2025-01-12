@@ -36,8 +36,8 @@ namespace NetherNet {
 		[[nodiscard]] std::chrono::seconds GetNegotiationTimeout() const { return mNegotiationTimeout; }
 		bool GetSessionState(NetworkID remoteId, uint64_t connectionId, SessionState* pConnState);
 		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryMessagePacket* packet);
-		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryRequestPacket* packet);
-		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryResponsePacket* packet);
+		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress const& addr, DiscoveryRequestPacket const& packet);
+		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryResponsePacket& packet);
 		void ReceiveFromLanSignalingChannel(NetworkID remoteId, const std::string& data, bool a3, SignalingChannelId channelId);
 		void ProcessSessionError(NetworkID remoteId, ESessionError err);
 		void ProcessTurnConfig(const std::string& config);
@@ -49,7 +49,7 @@ namespace NetherNet {
 		bool IsBroadcastDiscoveryEnabled() const;
 		bool IsPacketAvailable(NetworkID remoteId, uint32_t* pcbMessageSize);
 		bool IsSignedIntoSignalingService();
-		void NotifyOnSessionOpen();
+		void NotifyOnSessionOpen(NetworkID id);
 		void NotifyOnSessionClose(NetworkID id, ESessionError err);
 
 		void ReceiveFromLanSignalingChannel(NetworkID remoteId, std::string const& data);
@@ -58,7 +58,7 @@ namespace NetherNet {
 		void UpdateConfigWithRelayToken(webrtc::PeerConnectionInterface::RTCConfiguration* pRtcConfig);
 	public:
 		NetworkID								mRemoteId;				// this + 0x008
-		INetherNetTransportInterfaceCallbacks*  mRecvCallBack;			// this + 0x010
+		INetherNetTransportInterfaceCallbacks*  mCallBack;			// this + 0x010
 		NetworkID								mReceiverId;			// this + 0x018
 		//std::shared_ptr<NetworkSessionManager>	mNetworkSessionMgr;		// this + 0x020
 		std::mutex								mConnectionMtx;			// this + 0x030

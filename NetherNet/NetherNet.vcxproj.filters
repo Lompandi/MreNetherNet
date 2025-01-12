@@ -57,6 +57,9 @@
     <ClCompile Include="NetherNet\connection\MyDataChannelObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetherNet\network\packets\DiscoveryResponsePacket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetherNet\encryption\AesContext.hpp">
@@ -147,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetherNet\connection\MyDataChannelObserver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetherNet\logging\LogSeverity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

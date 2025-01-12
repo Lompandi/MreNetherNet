@@ -8,7 +8,7 @@
 #include <cstdarg>
 
 namespace NetherNet {
-	int g_LogSeverity = 1;
+	LogSeverity g_LogSeverity = LogSeverity::CriticalOnly;
 
 	ErrorOr<std::vector<uint8_t>, std::error_code> 
 	CreateKey(uint64_t id) {

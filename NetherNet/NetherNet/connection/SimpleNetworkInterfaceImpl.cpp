@@ -53,17 +53,21 @@ namespace NetherNet {
 		}
 	}
 
-	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryResponsePacket* packet) {
-		if (mRecvCallBack && packet->SenderId() != mReceiverId) {
-			NetworkID senderId = packet->SenderId();
-			auto sockAddr = addr->ToString();
+	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(
+		rtc::SocketAddress& addr,
+		DiscoveryResponsePacket& packet
+	) {
+		if (mCallBack && packet.SenderId() != mReceiverId) {
+			NetworkID senderId = packet.SenderId();
+			auto sockAddr = addr.ToString();
 			NetherNet::NetherNetTransport_LogMessage(
 				5,
 				"Recieved discovery response from \"%s\" with network id \"%llu\"",
 				sockAddr,
 				senderId);
 
-			//TODO: invoke callback
+			auto application_data = packet.ApplicationData();
+			mCallBack->OnBroadcastResponseReceived(senderId, application_data.data(), packet.PacketLength());
 		}
 	}
 
@@ -144,8 +148,33 @@ namespace NetherNet {
 		}
 	}
 
-	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryRequestPacket* packet) {
+	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(
+		rtc::SocketAddress const& addr,
+		DiscoveryRequestPacket const& packet
+	) {
+		if (mCallBack && packet.SenderId() != mReceiverId) {
+			NetworkID senderId = packet.SenderId();
+			auto sockAddr = addr.ToString();
 
+			NetherNet::NetherNetTransport_LogMessage(
+				5,
+				"Received discovery request from \"%s\" with network id \"%llu\"",
+				sockAddr,
+				senderId);
+
+			// I'll assume this is intended (?) but it's really wierd to use array here
+			int outMessageSizes[] = { 1148 };
+			char outData[1152] = {};
+
+			if (
+				mCallBack->OnBroadcastDiscoveryRequestReceivedGetResponse(outData, outMessageSizes)
+			) {
+				std::string_view response_data(outData, outMessageSizes[0]);
+				DiscoveryResponsePacket disc_resp_pkt(mReceiverId, response_data);
+				auto send_thread = &getLanThread();
+				send_thread->SendLanBroadcastResponse(addr, disc_resp_pkt);
+			}
+		}
 	}
 
 	//...
@@ -211,14 +240,12 @@ namespace NetherNet {
 		ReceiveFromLanSignalingChannel(remoteId, data, a3, SignalingChannelId::WebSocket);
 	}
 
-	void SimpleNetworkInterfaceImpl::NotifyOnSessionOpen() {
-		//Invoke callback
-		//TODO
-
+	void SimpleNetworkInterfaceImpl::NotifyOnSessionOpen(NetworkID id) {
+		mCallBack->OnSessionOpen(id);
 	}
 
 	void SimpleNetworkInterfaceImpl::NotifyOnSessionClose(NetworkID id, ESessionError err) {
-		//TODO
+		mCallBack->OnSessionClose(id, err);
 	}
 
 	bool SimpleNetworkInterfaceImpl::IsSignedIntoSignalingService() {
