@@ -10,6 +10,7 @@
 namespace NetherNet {
 	class LanThreadManager : public rtc::Thread {
 	public:
+		LanThreadManager() = default;
 		bool IsBroadcastDiscoveryEnabled(NetworkID id);
 		void SendLanBroadcastRequest(std::unique_ptr<rtc::AsyncPacketSocket>& socket, NetherNet::NetworkID id);
 		std::error_code SendToHelper(std::unique_ptr<rtc::AsyncPacketSocket>& socket,
@@ -27,5 +28,5 @@ namespace NetherNet {
 
 	LanThreadManager& getLanThread();
 
-	extern LanThreadManager g_LanThread;
+	extern LanThreadManager* g_LanThread;
 }

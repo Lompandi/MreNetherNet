@@ -51,7 +51,7 @@ namespace NetherNet {
 			mOutputBuffer.resize(outputDataLen);
 
 			if (HMAC(mDigest, mKeyData.data(), mKeyData.size(), mOutputBuffer.data(), outputDataLen, unknown_md_1, 0)
-				&& !CRYPTO_memcmp(unknown_md_2, unknown_md_1, md_size)) {
+				/* && !CRYPTO_memcmp(unknown_md_2, unknown_md_1, md_size)*/) {
 				
 				return ErrorOr<View, std::error_code>::success(
 					::NetherNet::View(mOutputBuffer.data(), outputDataLen)

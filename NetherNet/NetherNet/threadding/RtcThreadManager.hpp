@@ -5,7 +5,6 @@
 #include <rtc_base/thread.h>
 
 namespace NetherNet {
-
 	struct ThreadInit;
 
 	class RtcThreadManager {
@@ -16,15 +15,15 @@ namespace NetherNet {
 		void Shutdown();
 
 		bool IsOnThread();
-		[[nodiscard]] std::shared_ptr<rtc::Thread> GetRtcThread();
+		[[nodiscard]] /*std::shared_ptr<rtc::Thread>*/ rtc::Thread* GetRtcThread();
 
-		std::shared_ptr<rtc::Thread> LoadRtcThread();
+		/*std::shared_ptr<rtc::Thread>*/ rtc::Thread* LoadRtcThread();
 
 	private:
-		std::atomic<std::shared_ptr<rtc::Thread>> mThread;
+		std::atomic<rtc::Thread*> mThread;
 	};
 
 	extern RtcThreadManager g_SignalThread;
 
-	RtcThreadManager* getSignalThread() { return &g_SignalThread; }
+	RtcThreadManager* getSignalThread();
 }

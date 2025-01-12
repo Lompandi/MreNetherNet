@@ -7,10 +7,9 @@
 #include "MyStatsObserver.hpp"
 #include "../network/NetworkID.hpp"
 #include "SimpleNetworkInterfaceImpl.hpp"
-
+#include "../network/NetworkSessionManager.hpp"
 
 namespace NetherNet {
-	enum ESessionError;
 	enum ESendType;
 
 	class NetworkSession : public webrtc::PeerConnectionObserver {
@@ -25,7 +24,7 @@ namespace NetherNet {
 
 		void AcceptSession();
 		void ApplyConnectionFlags(webrtc::PeerConnectionInterface::RTCConfiguration* config, uint32_t flag);
-		void CheckSendDeferredData(webrtc::DataChannelInterface* interface);
+		void CheckSendDeferredData(webrtc::DataChannelInterface* iface);
 		void CheckUpdateStats();
 		void Close();
 		bool GetSessionState(SessionState* outState);
@@ -44,10 +43,10 @@ namespace NetherNet {
 
 
 		void OnConnectionChange(webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
-		void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> interface) override;
+		void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> iface) override;
 		void OnDataChannelMessage(webrtc::DataChannelInterface* iface, webrtc::DataBuffer const& data) ;
 		void OnDataChannelStateChange(webrtc::DataChannelInterface* iface);
-		void OnIceCandidate(webrtc::IceCandidateInterface const* interface) override;
+		void OnIceCandidate(webrtc::IceCandidateInterface const* iface) override;
 		void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
 		void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state) override;
 		void OnStatsRequestComplete(std::vector<webrtc::StatsReport const*> const& reports);;
@@ -87,10 +86,6 @@ namespace NetherNet {
 		4 -> stun
 		3 -> local
 		*/
-	};
-
-	enum ESessionError {
-
 	};
 
 	enum ESendType {

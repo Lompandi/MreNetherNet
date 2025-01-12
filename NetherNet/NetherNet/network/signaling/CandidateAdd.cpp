@@ -8,5 +8,8 @@ namespace NetherNet {
 		return ice_candidate;
 	}
 
+	std::optional<::NetherNet::CandidateAdd>
+		CandidateAdd::TryCreate(uint64_t sessionId, ::webrtc::IceCandidateInterface const& rtcCandidate) {
 
+	}
 }

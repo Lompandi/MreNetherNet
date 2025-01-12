@@ -2,10 +2,10 @@
 #include <api/jsep_session_description.h>
 
 namespace NetherNet {
-
-    //TODO
-    class ConnectResponse {
+    using ConnectResponse = uint64_t;
+    /*class ConnectResponse {
     public:
+        
         std::unique_ptr<webrtc::SessionDescriptionInterface> GetSdp() const {
             webrtc::CreateSessionDescription(webrtc::SdpType::kAnswer, mSdp);
         };
@@ -19,5 +19,5 @@ namespace NetherNet {
     private:
         uint64_t    mSessionId;     //this + 0x00
         std::string mSdp;           //this + 0x08
-    };
+    };*/
 } 

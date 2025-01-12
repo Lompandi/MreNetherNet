@@ -3,16 +3,16 @@
 
 namespace NetherNet {
 
-	std::shared_ptr<rtc::Thread> RtcThreadManager::GetRtcThread() {
-		return GetRtcThread();
+	/*std::shared_ptr<rtc::Thread>*/ rtc::Thread* RtcThreadManager::GetRtcThread() {
+		return LoadRtcThread();
 	}
 
-	std::shared_ptr<rtc::Thread> RtcThreadManager::LoadRtcThread() {
-		return mThread.load(std::memory_order::relaxed);
+	/*std::shared_ptr<rtc::Thread>*/rtc::Thread* RtcThreadManager::LoadRtcThread() {
+		return mThread.load(std::memory_order::memory_order_relaxed);
 	}
 
 	bool RtcThreadManager::IsOnThread() {
-		auto RtcThread = LoadRtcThread().get();
+		auto RtcThread = LoadRtcThread()/*.get()*/;
 		if (RtcThread) {
 			return RtcThread->IsCurrent();
 		}
@@ -23,7 +23,7 @@ namespace NetherNet {
 		rtc::Thread ServerThread(std::move(socketServer));
 
 		ServerThread.SetName(threadName, nullptr);
-		mThread.store(std::make_shared<rtc::Thread>(std::move(ServerThread)), std::memory_order::relaxed);
+		mThread.store(&ServerThread, std::memory_order::memory_order_relaxed);
 	}
 
 	void RtcThreadManager::Shutdown() {
@@ -35,4 +35,6 @@ namespace NetherNet {
 	}
 
 	RtcThreadManager g_SignalThread;
+
+	RtcThreadManager* getSignalThread() { return &g_SignalThread; }
 }

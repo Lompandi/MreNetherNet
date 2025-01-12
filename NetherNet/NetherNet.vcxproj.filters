@@ -48,13 +48,13 @@
     <ClCompile Include="NetherNet\network\signaling\ConnectError.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NetherNet\network\signaling\ConnectResponse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NetherNet\network\signaling\CandidateAdd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NetherNet\network\tasks\parse_config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetherNet\connection\MyDataChannelObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

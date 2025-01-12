@@ -8,6 +8,7 @@
 #include "SimpleNetworkInterfaceImpl.hpp"
 #include "../network/SignalingChannelId.hpp"
 #include "../network/packets/ESessionError.hpp"
+#include "../network/signaling/ConnectResponse.hpp"
 
 namespace NetherNet {
 	void SimpleNetworkInterfaceImpl::EnableSignalingOverLAN() {
@@ -26,7 +27,7 @@ namespace NetherNet {
 
 	void SimpleNetworkInterfaceImpl::AcceptSessionWithUser(NetworkID id) {
 		std::lock_guard<std::mutex> lock(mConnectionMtx);
-		mNetworkSessionMgr->AcceptSessionWithUser(id);
+		/*mNetworkSessionMgr->AcceptSessionWithUser(id);*/
 	}
 
 	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(
@@ -127,16 +128,16 @@ namespace NetherNet {
 		if (result.has_value()) {
 			auto& var = result.value();
 			if (std::holds_alternative<ConnectError>(var)) {
-				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectError>(var), channelId);
+				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectError>(var), channelId);
 			}
 			else if (std::holds_alternative<ConnectResponse>(var)) {
-				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectResponse>(var), channelId);
+				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectResponse>(var), channelId);
 			}
 			else if (std::holds_alternative<CandidateAdd>(var)) {
-				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<CandidateAdd>(var), channelId);
+				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<CandidateAdd>(var), channelId);
 			}
 			else if (std::holds_alternative<ConnectRequest>(var)) {
-				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectRequest>(var), channelId);
+				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectRequest>(var), channelId);
 			}
 		}else if(message.find("Username") != std::string::npos){
 			ProcessTurnConfig(message);
@@ -199,7 +200,7 @@ namespace NetherNet {
 
 	bool SimpleNetworkInterfaceImpl::IsPacketAvailable(NetworkID remoteId, uint32_t* pcbMessageSize) {
 		std::lock_guard<std::mutex> lock(mConnectionMtx);
-		return mNetworkSessionMgr->IsPacketAvailable(remoteId, pcbMessageSize);
+		//return mNetworkSessionMgr->IsPacketAvailable(remoteId, pcbMessageSize);
 	}
 
 	void SimpleNetworkInterfaceImpl::ReceiveFromLanSignalingChannel(NetworkID remoteId, std::string const& data) {
@@ -214,5 +215,21 @@ namespace NetherNet {
 		//Invoke callback
 		//TODO
 
+	}
+
+	void SimpleNetworkInterfaceImpl::NotifyOnSessionClose(NetworkID id, ESessionError err) {
+		//TODO
+	}
+
+	bool SimpleNetworkInterfaceImpl::IsSignedIntoSignalingService() {
+		//TODO
+	}
+
+	void SimpleNetworkInterfaceImpl::ProcessTurnConfig(const std::string& config) {
+		//TODO
+	}
+
+	void SimpleNetworkInterfaceImpl::ProcessSessionError(NetworkID remoteId, ESessionError err) {
+		//TODO
 	}
 }

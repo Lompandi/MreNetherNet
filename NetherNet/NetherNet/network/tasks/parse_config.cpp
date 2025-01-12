@@ -65,11 +65,8 @@ namespace NetherNet {
 							}
 						}
 					}
-
-
 				}
 			}
-
 		}
 	}
 }

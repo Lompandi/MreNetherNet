@@ -1,7 +1,13 @@
 #pragma once
 
 #include "NetworkID.hpp"
+
+#include "signaling/ConnectError.hpp"
+#include "signaling/ConnectResponse.hpp"
 #include "signaling/ConnectRequest.hpp"
+#include "signaling/CandidateAdd.hpp"
+
+#include "../connection/SimpleNetworkInterfaceImpl.hpp"
 
 namespace NetherNet {
 	class NetworkSessionManager {
@@ -33,7 +39,7 @@ namespace NetherNet {
 		);
 
 		bool IsPacketAvailable(NetworkID id, uint32_t* mcbMessage);
-
+	public:
 		SimpleNetworkInterfaceImpl* mSimpleNetworkInterface;	//this + 0xC0
 	};
 }

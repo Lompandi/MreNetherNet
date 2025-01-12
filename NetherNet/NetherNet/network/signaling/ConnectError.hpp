@@ -12,7 +12,9 @@ namespace NetherNet {
 	class ConnectError {
 	public:
 		ConnectError() noexcept = default;
-
+		ConnectError(uint64_t sessionId, ESessionError err)
+			: mSessionId(sessionId), mErr(err){ }
+ 
 		std::string ToString();
 
 		static ConnectError Create(uint64_t sessionId, ESessionError err);

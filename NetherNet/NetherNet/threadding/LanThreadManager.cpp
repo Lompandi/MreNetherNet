@@ -6,7 +6,7 @@
 
 namespace NetherNet {
 
-	LanThreadManager g_LanThread;
+	LanThreadManager* g_LanThread;
 
 	std::error_code LanThreadManager::SendToHelper(
 		std::unique_ptr<rtc::AsyncPacketSocket>& socket,
@@ -31,6 +31,11 @@ namespace NetherNet {
 
 	}
 
+	bool LanThreadManager::IsBroadcastDiscoveryEnabled(NetworkID id) {
+		//TODO
+		return true;
+	}
+
 	void LanThreadManager::SendLanBroadcastRequest(std::unique_ptr<rtc::AsyncPacketSocket>& socket, NetherNet::NetworkID id) {
 		if (!true) {
 			return;
@@ -49,7 +54,7 @@ namespace NetherNet {
 			rtc::SocketAddress sockAddr(ipAddrStr, mConnPort);
 			//Type = Social::GameConnectionInfo::getType();
 			//TODO:
-			SendToHelper(socket, );
+			/*SendToHelper(socket, );*/
 		}
 	}
 
@@ -58,6 +63,6 @@ namespace NetherNet {
 	}
 
 	LanThreadManager& getLanThread() {
-		return g_LanThread;
+		return *g_LanThread;
 	}
 }

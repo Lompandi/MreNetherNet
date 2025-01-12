@@ -7,10 +7,10 @@
 namespace NetherNet {
     class MyStatsObserver : public ::webrtc::StatsObserver {
     public:
-        virtual void AddRef() const override;
+        void AddRef() const override;
 
-        virtual rtc::RefCountReleaseStatus Release() const override;
+        rtc::RefCountReleaseStatus Release() const override;
 
-        virtual void OnComplete(::std::vector<::webrtc::StatsReport const*> const& reports) override;
+        void OnComplete(::std::vector<::webrtc::StatsReport const*> const& reports) override;
     };
 }
