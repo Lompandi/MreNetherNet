@@ -34,5 +34,6 @@ namespace NetherNet {
 
 		bool IsPacketAvailable(NetworkID id, uint32_t* mcbMessage);
 
+		SimpleNetworkInterfaceImpl* mSimpleNetworkInterface;	//this + 0xC0
 	};
 }

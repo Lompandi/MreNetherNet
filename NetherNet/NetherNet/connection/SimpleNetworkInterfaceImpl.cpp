@@ -210,5 +210,9 @@ namespace NetherNet {
 		ReceiveFromLanSignalingChannel(remoteId, data, a3, SignalingChannelId::WebSocket);
 	}
 
+	void SimpleNetworkInterfaceImpl::NotifyOnSessionOpen() {
+		//Invoke callback
+		//TODO
 
+	}
 }

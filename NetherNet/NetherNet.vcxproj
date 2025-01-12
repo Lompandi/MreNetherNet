@@ -152,6 +152,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetherNet\connection\INetherNetTransportInterfaceCallbacks.hpp" />
+    <ClInclude Include="NetherNet\connection\MyDataChannelObserver.hpp" />
+    <ClInclude Include="NetherNet\connection\MyStatsObserver.hpp" />
     <ClInclude Include="NetherNet\connection\NetherNetTransportServerConfiguration.hpp" />
     <ClInclude Include="NetherNet\connection\NetworkSession.hpp" />
     <ClInclude Include="NetherNet\connection\SimpleNetworkInterfaceImpl.hpp" />

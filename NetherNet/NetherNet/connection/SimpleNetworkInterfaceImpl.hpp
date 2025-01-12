@@ -23,6 +23,7 @@ namespace NetherNet { struct ERelayServerConfigurationResult; }
 namespace NetherNet {
 	struct SimpleNetworkInterfaceImpl {
 
+	public:
 		[[nodiscard]] std::chrono::seconds GetNegotiationTimeout() { return mNegotiationTimeout; }
 
 		void AcceptSessionWithUser(NetworkID id);
@@ -49,11 +50,14 @@ namespace NetherNet {
 		bool IsBroadcastDiscoveryEnabled() const;
 		bool IsPacketAvailable(NetworkID remoteId, uint32_t* pcbMessageSize);
 		bool IsSignedIntoSignalingService();
+		void NotifyOnSessionOpen();
+		void NotifyOnSessionClose(NetworkID id, ESessionError err);
+
 		void ReceiveFromLanSignalingChannel(NetworkID remoteId, std::string const& data);
 		void ReceiveFromWebSocketSignalingChannel(NetworkID remoteId, std::string const& data, bool a3);
 
 		void UpdateConfigWithRelayToken(webrtc::PeerConnectionInterface::RTCConfiguration* pRtcConfig);
-	private:
+	public:
 		NetworkID								mRemoteId;				// this + 0x008
 		INetherNetTransportInterfaceCallbacks*  mRecvCallBack;			// this + 0x010
 		NetworkID								mReceiverId;			// this + 0x018
