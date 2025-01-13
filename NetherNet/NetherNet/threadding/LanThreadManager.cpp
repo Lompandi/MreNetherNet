@@ -16,6 +16,7 @@ namespace NetherNet {
 
 		auto sendResult = 0;
 
+		//TODO:
 		if (addr.ipaddr().family() != AF_INET) {
 			//Other network layer protocol used
 			rtc::PacketOptions packetOpt;
@@ -33,7 +34,7 @@ namespace NetherNet {
 		}
 
 		if (sendResult == -1) {
-			//process error;
+			//TODO: process error;
 		}
 	}
 

@@ -4,6 +4,7 @@
 #include <openssl/err.h>
 
 #include "AesContext.hpp"
+#include "../utils/Strings.hpp"
 #include "OpenSSLInterface.hpp"
 
 namespace NetherNet {
@@ -25,7 +26,7 @@ namespace NetherNet {
 			auto mCipher = GetCipher();
 			if (EVP_DecryptInit_ex(mCipherCtx, mCipher, NULL, mKeyData.data(), mKeyData.data()) != 1) {
 				auto err = ERR_get_error();
-				return ErrorOr<View, std::error_code>::error(make_error_code(err));
+				return result_error{ make_error_code(err) };
 			}
 
 			auto mInputBuffer = buffer.data() + md_size;
@@ -34,13 +35,13 @@ namespace NetherNet {
 			int outSize = 0;
 			if (EVP_DecryptUpdate(mCipherCtx, (uint8_t*)mOutputBuffer.data(), &outSize, mInputBuffer, buffer.size() - md_size) != 1) {
 				auto err = ERR_get_error();
-				return ErrorOr<View, std::error_code>::error(make_error_code(err));
+				return result_error{ make_error_code(err) };
 			}
 
 			int finalOutSize = 0;
 			if (EVP_DecryptFinal_ex(mCipherCtx, mOutputBuffer.data() + outSize, &finalOutSize) != 1) {
 				auto err = ERR_get_error();
-				return ErrorOr<View, std::error_code>::error(make_error_code(err));
+				return result_error{ make_error_code(err) };
 			}
 
 			//PLACEHOLDER 
@@ -53,14 +54,12 @@ namespace NetherNet {
 			if (HMAC(mDigest, mKeyData.data(), mKeyData.size(), mOutputBuffer.data(), outputDataLen, unknown_md_1, 0)
 				/* && !CRYPTO_memcmp(unknown_md_2, unknown_md_1, md_size)*/) {
 				
-				return ErrorOr<View, std::error_code>::success(
-					::NetherNet::View(mOutputBuffer.data(), outputDataLen)
-				);
+				return ::NetherNet::View(mOutputBuffer.data(), outputDataLen);
 			}
 		}
 
 		auto err = ERR_get_error();
-		return ErrorOr<View, std::error_code>::error(make_error_code(err));
+		return result_error{ make_error_code(err) };
 	}
 
 	ErrorOr<::NetherNet::View, std::error_code>
@@ -71,7 +70,7 @@ namespace NetherNet {
 			std::vector<uint8_t> outCipherText(16, '\0');
 			if (EVP_EncryptInit_ex(mCipherCtx, mCipher, NULL, mKeyData.data(), mKeyData.data()) != 1) {
 				auto err = ERR_get_error();
-				return ErrorOr<View, std::error_code>::error(make_error_code(err));
+				return result_error{ make_error_code(err) };
 			}
 
 			auto mDigest = GetDigest();
@@ -84,7 +83,7 @@ namespace NetherNet {
 
 			if (!HMAC(mDigest, mKeyData.data(), mKeyData.size(), plaintext.data(), plaintext.get_len(), mOutputBuffer.data(), 0)) {
 				auto err = ERR_get_error();
-				return ErrorOr<View, std::error_code>::error(make_error_code(err));
+				return result_error{ make_error_code(err) };
 			}
 
 			int outLen = 0;
@@ -95,13 +94,11 @@ namespace NetherNet {
 				&& EVP_EncryptFinal_ex(mCipherCtx, mOutputBuffer.data() + Md_size + outLen, &finalOutLen) == 1) {
 
 				int totalLength = outLen + finalOutLen;
-				return ErrorOr<View, std::error_code>::success(
-					::NetherNet::View(mOutputBuffer.data(), Md_size + totalLength)
-				);
+				return ::NetherNet::View(mOutputBuffer.data(), Md_size + totalLength);
 			}
 		}
 
 		auto err = ERR_get_error();
-		return ErrorOr<View, std::error_code>::error(make_error_code(err));
+		return result_error{ make_error_code(err) };
 	}
 }

@@ -65,10 +65,10 @@
     <ClInclude Include="NetherNet\encryption\AesContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NetherNet\types\Errors.hpp">
+    <ClInclude Include="NetherNet\utils\Errors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NetherNet\types\Strings.hpp">
+    <ClInclude Include="NetherNet\utils\Strings.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetherNet\connection\NetworkSession.hpp">

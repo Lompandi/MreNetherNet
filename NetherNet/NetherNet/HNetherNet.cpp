@@ -24,50 +24,40 @@ namespace NetherNet {
 		if (!pMdCtx) {
 			auto err = ERR_get_error();
 			EVP_MD_CTX_free(pMdCtx);
-			return ErrorOr<std::vector<uint8_t>, std::error_code>::error(
-				make_error_code(err)
-			);
+			return result_error{ make_error_code(err) };
 		}
 
 		if (EVP_DigestInit_ex(pMdCtx, mHashType, NULL) != 1) {
 			auto err = ERR_get_error();
 			EVP_MD_CTX_free(pMdCtx);
-			return ErrorOr<std::vector<uint8_t>, std::error_code>::error(
-				make_error_code(err)
-			);
+			return result_error{ make_error_code(err) };
 		}
 
 		uint64_t Id = id;
 		if (EVP_DigestUpdate(pMdCtx, &Id, 8) != 1) {
 			auto err = ERR_get_error();
 			EVP_MD_CTX_free(pMdCtx);
-			return ErrorOr<std::vector<uint8_t>, std::error_code>::error(
-				make_error_code(err)
-			);
+			return result_error{ make_error_code(err) };
 		}
 
 		if (EVP_DigestFinal(pMdCtx, Key.data(), NULL) != 1) {
 			auto err = ERR_get_error();
 			EVP_MD_CTX_free(pMdCtx);
-			return ErrorOr<std::vector<uint8_t>, std::error_code>::error(
-				make_error_code(err)
-			);
+			return result_error{ make_error_code(err) };
 		}
 
 		EVP_MD_CTX_free(pMdCtx);
-		return ErrorOr<std::vector<uint8_t>, std::error_code>::success(
-			Key
-		);
+		return Key;
 	}
 
 	//TODO: finished up this thing
 	ErrorOr<std::unique_ptr<::NetherNet::AesContext>, std::error_code> 
 	CreateEnvelope(uint64_t id) {
 		auto Key = ::NetherNet::CreateKey(id);
-		if (Key.is_error()) {
-			return ErrorOr<std::unique_ptr<AesContext>, std::error_code>::error(Key.error());
+		if (!Key.has_value()) {
+			return result_error{ Key.error() };
 		}
-		return ErrorOr<std::unique_ptr<AesContext>, std::error_code>::error(Key.error());
+		return std::make_unique<AesContext>(Key);
 	}
 
 	void NetherNetTransport_LogMessage(int serverity, const char* msg, ...) {

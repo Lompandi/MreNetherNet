@@ -5,7 +5,7 @@
 #include <system_error>
 #include <variant>
 
-#include "types/Errors.hpp"
+#include "utils/Errors.hpp"
 #include "encryption/AesContext.hpp"
 
 #include "threadding/RtcThreadManager.hpp"

@@ -7,8 +7,8 @@
 #include <vector>
 #include <string>
 
-#include "../types/Errors.hpp"
-#include "../types/Strings.hpp"
+#include "../utils/Errors.hpp"
+#include "../utils/Strings.hpp"
 
 namespace NetherNet {
 	class AesContext {

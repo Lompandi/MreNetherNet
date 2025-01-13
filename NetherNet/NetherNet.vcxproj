@@ -184,8 +184,8 @@
     <ClInclude Include="NetherNet\network\tasks\parse_config.hpp" />
     <ClInclude Include="NetherNet\threadding\LanThreadManager.hpp" />
     <ClInclude Include="NetherNet\threadding\RtcThreadManager.hpp" />
-    <ClInclude Include="NetherNet\types\Errors.hpp" />
-    <ClInclude Include="NetherNet\types\Strings.hpp" />
+    <ClInclude Include="NetherNet\utils\Errors.hpp" />
+    <ClInclude Include="NetherNet\utils\Strings.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
