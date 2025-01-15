@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef AES_CONTEXT_HPP
+#define AES_CONTEXT_HPP
+
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -27,7 +30,7 @@ namespace NetherNet {
 
 		[[nodiscard]] size_t	GetBufferSizeForPlaintextSize(size_t plaintext_size);
 
-		ErrorOr<::NetherNet::View, std::error_code>	Open(std::vector<uint8_t>& ciphertext);
+		ErrorOr<::NetherNet::View, std::error_code>	Open(NetherNet::View envelope);
 		ErrorOr<::NetherNet::View, std::error_code>	Seal(NetherNet::View plaintext);
 
 	private:
@@ -37,3 +40,5 @@ namespace NetherNet {
 		EVP_CIPHER_CTX* mCipherCtx;
 	};
 }
+
+#endif

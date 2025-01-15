@@ -16,11 +16,11 @@ namespace NetherNet {
 
 	//TODO: check if this is working am figure out the MDs
 	ErrorOr<::NetherNet::View, std::error_code>
-	AesContext::Open(std::vector<uint8_t>& buffer) {
+	AesContext::Open(NetherNet::View envelope) {
 		auto mDigest = GetDigest();
 		int md_size = EVP_MD_size(mDigest);
 
-		if (buffer.size() >= md_size
+		if (envelope.get_len() >= md_size
 			&& EVP_CIPHER_CTX_reset(mCipherCtx) == 1) {
 			
 			auto mCipher = GetCipher();
@@ -29,11 +29,11 @@ namespace NetherNet {
 				return result_error{ make_error_code(err) };
 			}
 
-			auto mInputBuffer = buffer.data() + md_size;
-			mOutputBuffer.resize(buffer.size());
+			auto mInputBuffer = envelope.data() + md_size;
+			mOutputBuffer.resize(envelope.get_len());
 
 			int outSize = 0;
-			if (EVP_DecryptUpdate(mCipherCtx, (uint8_t*)mOutputBuffer.data(), &outSize, mInputBuffer, buffer.size() - md_size) != 1) {
+			if (EVP_DecryptUpdate(mCipherCtx, (uint8_t*)mOutputBuffer.data(), &outSize, mInputBuffer, envelope.get_len() - md_size) != 1) {
 				auto err = ERR_get_error();
 				return result_error{ make_error_code(err) };
 			}

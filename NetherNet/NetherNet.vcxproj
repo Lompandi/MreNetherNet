@@ -125,7 +125,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\libHttpClient\Include;D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -133,8 +133,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>webrtc.lib;ws2_32.lib;iphlpapi.lib;boringssl.lib;libyuv_internal.lib;secur32.lib;winmm.lib;dmoguids.lib;wmcodecdspuuid.lib;msdmo.lib;Strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\libHttpClient\Out\x64\Debug\libHttpClient.Win32;D:\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\webrtc-native-build-msvc-2019-win64-Release-4389.e7d9f7.130\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>webrtc.lib;ws2_32.lib;iphlpapi.lib;boringssl.lib;libyuv_internal.lib;secur32.lib;winmm.lib;dmoguids.lib;wmcodecdspuuid.lib;msdmo.lib;Strmiids.lib;libHttpClient.Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,6 +142,8 @@
     <ClCompile Include="NetherNet\connection\MyDataChannelObserver.cpp" />
     <ClCompile Include="NetherNet\connection\NetworkSession.cpp" />
     <ClCompile Include="NetherNet\connection\SimpleNetworkInterfaceImpl.cpp" />
+    <ClCompile Include="NetherNet\connection\WebSocket.cpp" />
+    <ClCompile Include="NetherNet\encryption\AesAdapter.cpp" />
     <ClCompile Include="NetherNet\encryption\AesContext.cpp" />
     <ClCompile Include="NetherNet\encryption\OpenSSLAesAdapter.cpp" />
     <ClCompile Include="NetherNet\encryption\OpenSSLInterface.cpp" />
@@ -161,6 +163,7 @@
     <ClInclude Include="NetherNet\connection\NetherNetTransportServerConfiguration.hpp" />
     <ClInclude Include="NetherNet\connection\NetworkSession.hpp" />
     <ClInclude Include="NetherNet\connection\SimpleNetworkInterfaceImpl.hpp" />
+    <ClInclude Include="NetherNet\connection\WebSocket.hpp" />
     <ClInclude Include="NetherNet\encryption\AesAdapter.hpp" />
     <ClInclude Include="NetherNet\encryption\AesContext.hpp" />
     <ClInclude Include="NetherNet\encryption\OpenSSLAesAdapter.hpp" />
