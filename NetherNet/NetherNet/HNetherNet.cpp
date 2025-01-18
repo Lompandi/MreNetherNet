@@ -57,7 +57,7 @@ namespace NetherNet {
 		if (!Key.has_value()) {
 			return result_error{ Key.error() };
 		}
-		return std::make_unique<AesContext>(Key);
+		return std::make_unique<AesContext>(Key.value());
 	}
 
 	void NetherNetTransport_LogMessage(int serverity, const char* msg, ...) {

@@ -19,6 +19,6 @@ namespace NetherNet {
             mpSession(pSession), mChannelInterface(pDataChannel) {}
     private:
         NetworkSession* mpSession;
-        webrtc::DataChannelInterface* mChannelInterface;
+        rtc::scoped_refptr<webrtc::DataChannelInterface> mChannelInterface;
 	};
 }

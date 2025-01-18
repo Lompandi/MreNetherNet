@@ -15,7 +15,7 @@ namespace NetherNet {
 	//TODO
 	class AesAdapter : public rtc::AsyncSocketAdapter {
 	public:
-		AesAdapter(std::unique_ptr<rtc::AsyncSocketAdapter> socket) :
+		AesAdapter(std::unique_ptr<rtc::Socket> socket) :
 			rtc::AsyncSocketAdapter(socket.get()) {}
 
 		virtual NetherNet::ErrorOr<void, std::error_code> SetKey(uint64_t id) = 0;

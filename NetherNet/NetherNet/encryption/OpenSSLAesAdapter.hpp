@@ -8,7 +8,7 @@ namespace NetherNet {
 	class OpenSSLAesAdapter : public AesAdapter {
 	public:
 
-		OpenSSLAesAdapter(std::unique_ptr<rtc::AsyncSocketAdapter> socket)
+		OpenSSLAesAdapter(std::unique_ptr<rtc::Socket> socket)
 			: AesAdapter(std::move(socket)){ }
 
 		//Success actually return void, but we will make that later

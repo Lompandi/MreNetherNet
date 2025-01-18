@@ -9,7 +9,7 @@ namespace NetherNet {
     public:
         void AddRef() const override;
 
-        rtc::RefCountReleaseStatus Release() const override;
+        webrtc::RefCountReleaseStatus Release() const override;
 
         void OnComplete(::std::vector<::webrtc::StatsReport const*> const& reports) override;
     };

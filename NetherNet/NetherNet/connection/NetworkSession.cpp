@@ -3,7 +3,6 @@
 
 #include <rtc_base/buffer.h>
 #include <rtc_base/copy_on_write_buffer.h>
-#include <rtc_base/task_utils/to_queued_task.h>
 
 #include "../HNetherNet.hpp"
 #include "NetworkSession.hpp"
@@ -14,7 +13,6 @@ namespace NetherNet {
 	void NetworkSession::UpdateSessionActivity() {
 		return;
 	}
-
 
 	//TODO 
 	void NetworkSession::SendPacket(
@@ -76,7 +74,7 @@ namespace NetherNet {
 		if ((flag & 1) != 0)
 			config->type = webrtc::PeerConnectionInterface::IceTransportsType::kRelay;
 		if ((flag & 2) != 0)
-			config->enable_dtls_srtp = true;
+			config->candidate_network_policy = webrtc::PeerConnectionInterface::CandidateNetworkPolicy::kCandidateNetworkPolicyLowCost;
 		mConnectionFlag = flag;
 	}
 
@@ -166,19 +164,19 @@ namespace NetherNet {
 		bool need_create = true;
 
 		if ((mConnectionFlag & 4) != 0) {
-			if (candidate.type().size() == 5 && candidate.type() == "local")
+			if (candidate.type() ==  webrtc::IceCandidateType::kHost)
 				need_create = false;
 		}
 		if ((mConnectionFlag & 8) != 0) {
-			if (candidate.type().size() == 4 && candidate.type() == "stun")
+			if (candidate.type() == webrtc::IceCandidateType::kSrflx)
 				need_create = false;
 		}
 		if ((mConnectionFlag & 16) != 0) {
-			if (candidate.type().size() == 5 && candidate.type() == "prflx")
+			if (candidate.type() == webrtc::IceCandidateType::kPrflx)
 				need_create = false;
 		}
 		if ((mConnectionFlag & 32) == 0 || 
-			candidate.type().size() != 5 || candidate.type() != "relay"){
+			candidate.type() != webrtc::IceCandidateType::kRelay){
 			if (need_create) {
 				auto candidate_create = CandidateAdd::TryCreate(mConnectionId, *iface);
 				if (candidate_create) {
@@ -217,7 +215,7 @@ namespace NetherNet {
 
 		iface->RegisterObserver(std::move(observer.get()));
 		UpdateDataChannelStates();
-		CheckSendDeferredData(iface);
+		CheckSendDeferredData(iface.get());
 	}
 
 	void NetworkSession::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) {

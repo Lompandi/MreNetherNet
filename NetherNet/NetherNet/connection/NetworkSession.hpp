@@ -1,17 +1,17 @@
 #pragma once
 
+#include <variant>
+
 #include <api/scoped_refptr.h>
 #include <api/peer_connection_interface.h>
 
-
 #include "MyStatsObserver.hpp"
+#include "../network/ESendType.hpp"
 #include "../network/NetworkID.hpp"
 #include "SimpleNetworkInterfaceImpl.hpp"
 #include "../network/NetworkSessionManager.hpp"
 
 namespace NetherNet {
-	enum ESendType;
-
 	class NetworkSession : public webrtc::PeerConnectionObserver {
 	public:
 		enum class ENegotiationState : int {
@@ -71,10 +71,10 @@ namespace NetherNet {
 		webrtc::PeerConnectionInterface::PeerConnectionState mPeerConnectionState;	//this + 0x5C
 		uint32_t							mConnectionStat;
 		MyStatsObserver						mStatsObserver;			 //this + 0x60
-		webrtc::DataChannelInterface* mUnreliableChannelInterface;	 //this + 0xD8
+		rtc::scoped_refptr<webrtc::DataChannelInterface> mUnreliableChannelInterface;	 //this + 0xD8
 		std::vector<rtc::CopyOnWriteBuffer>	mUnreliablePackets;		 //this + 0xE0
 		webrtc::DataChannelInterface::DataState mUnreliableChannelState; //this + 0xF8
-		webrtc::DataChannelInterface*		mReliableChannelInterface;	//this + 0x100
+		rtc::scoped_refptr<webrtc::DataChannelInterface>		mReliableChannelInterface;	//this + 0x100
 		std::vector<rtc::CopyOnWriteBuffer>	mReliablePackets;				//this + 0x108
 		webrtc::DataChannelInterface::DataState	mReliableChannelState;
 		uint32_t								mConnectionFlag;		 //this + 0x208
@@ -86,9 +86,5 @@ namespace NetherNet {
 		4 -> stun
 		3 -> local
 		*/
-	};
-
-	enum ESendType {
-
 	};
 }

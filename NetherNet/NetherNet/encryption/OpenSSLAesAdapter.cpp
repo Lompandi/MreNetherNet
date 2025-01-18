@@ -13,7 +13,7 @@ namespace NetherNet {
 		}
 
 		mEncryptionKey = std::move(envelope.value());
-		return;
+		return {};
 	}
 
 	int OpenSSLAesAdapter::SendTo(void const* pv, uint64_t cb, rtc::SocketAddress const& addr) {
