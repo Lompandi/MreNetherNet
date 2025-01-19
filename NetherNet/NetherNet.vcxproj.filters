@@ -81,6 +81,9 @@
     <ClCompile Include="NetherNet\network\PeerRecordTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetherNet\Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetherNet\encryption\AesContext.hpp">
@@ -225,6 +228,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetherNet\network\PeerRecordTable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetherNet\Controller.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

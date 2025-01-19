@@ -146,6 +146,7 @@
     <ClCompile Include="NetherNet\connection\ServerNetherNetConnector.cpp" />
     <ClCompile Include="NetherNet\connection\SimpleNetworkInterfaceImpl.cpp" />
     <ClCompile Include="NetherNet\connection\WebSocket.cpp" />
+    <ClCompile Include="NetherNet\Controller.cpp" />
     <ClCompile Include="NetherNet\encryption\AesAdapter.cpp" />
     <ClCompile Include="NetherNet\encryption\AesContext.cpp" />
     <ClCompile Include="NetherNet\encryption\OpenSSLAesAdapter.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="NetherNet\connection\ServerNetherNetConnector.hpp" />
     <ClInclude Include="NetherNet\connection\SimpleNetworkInterfaceImpl.hpp" />
     <ClInclude Include="NetherNet\connection\WebSocket.hpp" />
+    <ClInclude Include="NetherNet\Controller.hpp" />
     <ClInclude Include="NetherNet\encryption\AesAdapter.hpp" />
     <ClInclude Include="NetherNet\encryption\AesContext.hpp" />
     <ClInclude Include="NetherNet\encryption\OpenSSLAesAdapter.hpp" />
