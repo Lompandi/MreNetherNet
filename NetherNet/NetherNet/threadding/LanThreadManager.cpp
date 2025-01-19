@@ -134,7 +134,7 @@ namespace NetherNet {
 					//...
 					rtc_thread->PostTask([&]() {
 						char packetId = -1; //TODO
-						std::variant<DiscoveryRequestPacket, DiscoveryResponsePacket, DiscoveryMessagePacket> packet_var;
+						/*std::variant<DiscoveryRequestPacket, DiscoveryResponsePacket, DiscoveryMessagePacket> packet_var;
 
 						if (packetId) {
 							if (packetId == 1)
@@ -143,7 +143,7 @@ namespace NetherNet {
 								NetherNet::HandleDiscoveryPacketOnSignalThread(sock_addr2, std::get<DiscoveryMessagePacket>(packet_var));
 						}
 						else
-							NetherNet::HandleDiscoveryPacketOnSignalThread(sock_addr2, std::get<DiscoveryRequestPacket>(packet_var));
+							NetherNet::HandleDiscoveryPacketOnSignalThread(sock_addr2, std::get<DiscoveryRequestPacket>(packet_var));*/
 					});
 				}
 
@@ -452,7 +452,7 @@ namespace {
 	TryCreateEncryptedBroadcastSocket(rtc::SocketServer* sock_server, uint64_t key, uint16_t port) {
 		auto socket_create = TryCreateBroadcastSocket(sock_server, port);
 		if (socket_create.err()) {
-			return result_error{ socket_create.error() };
+			//return result_error{ socket_create.error() };
 		}
 
 		auto aes_adapter = AesAdapter::Create(std::unique_ptr<rtc::Socket>((rtc::Socket*)socket_create.value()));

@@ -4,7 +4,7 @@
 #include <mutex>
 
 namespace NetherNet::Utils {
-	auto GetTimeNow();
+	std::chrono::steady_clock::time_point GetTimeNow();
 
     template <typename T>
     class ThreadSafe {
