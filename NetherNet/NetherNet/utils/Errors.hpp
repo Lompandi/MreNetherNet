@@ -33,6 +33,10 @@ namespace NetherNet {
             return impl.index() == 0;
         }
 
+        [[nodiscard]] constexpr bool err() const {
+            return impl.index() != 0;
+        }
+
         constexpr T& value() noexcept {
             return std::get<0>(impl);
         }
@@ -65,6 +69,10 @@ namespace NetherNet {
 
         [[nodiscard]] constexpr bool has_value() const {
             return impl.index() == 0;
+        }
+
+        [[nodiscard]] constexpr bool err() const {
+            return impl.index() != 0;
         }
 
         constexpr E& error() noexcept {

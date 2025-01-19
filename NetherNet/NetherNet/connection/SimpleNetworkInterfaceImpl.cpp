@@ -31,25 +31,25 @@ namespace NetherNet {
 	}
 
 	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(
-		rtc::SocketAddress* addr,
-		DiscoveryMessagePacket* packet
+		rtc::SocketAddress& addr,
+		DiscoveryMessagePacket& packet
 	) {
-		if (packet->RecipientId() == mReceiverId) {
-			auto message_data = packet->MessageData();
+		if (packet.RecipientId() == mReceiverId) {
+			auto message_data = packet.MessageData();
 
 			std::string packet_data;
 			packet_data.assign(message_data.data());
 
-			std::string host_addr = addr->ToString();
+			std::string host_addr = addr.ToString();
 			::NetherNet::NetherNetTransport_LogMessage(
 				4,
 				"Received discovery message from \"%s\" with network id \"%llu\" and message \"%s\"",
 				host_addr.data(),
-				packet->SenderId(),
+				packet.SenderId(),
 				message_data.data()
 			);
 
-			ReceiveFromLanSignalingChannel(packet->SenderId(), packet_data);
+			ReceiveFromLanSignalingChannel(packet.SenderId(), packet_data);
 		}
 	}
 

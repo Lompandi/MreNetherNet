@@ -74,4 +74,16 @@ namespace NetherNet {
 	TryParseSignalingMessage(const std::string& message) {
 
 	}
+
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryMessagePacket const& packet) {
+		//TODO
+	}
+
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryRequestPacket const& packet) {
+		//TODO
+	}
+
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryResponsePacket& packet) {
+		//TODO
+	}
 }

@@ -35,7 +35,7 @@ namespace NetherNet {
 		uint32_t GetConnectionFlags(NetworkID remoteId);
 		[[nodiscard]] std::chrono::seconds GetNegotiationTimeout() const { return mNegotiationTimeout; }
 		bool GetSessionState(NetworkID remoteId, uint64_t connectionId, SessionState* pConnState);
-		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress* addr, DiscoveryMessagePacket* packet);
+		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryMessagePacket& packet);
 		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress const& addr, DiscoveryRequestPacket const& packet);
 		void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryResponsePacket& packet);
 		void ReceiveFromLanSignalingChannel(NetworkID remoteId, const std::string& data, bool a3, SignalingChannelId channelId);

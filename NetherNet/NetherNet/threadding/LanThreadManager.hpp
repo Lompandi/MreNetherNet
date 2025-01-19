@@ -10,14 +10,25 @@
 #include <api/jsep.h>
 #include <httpClient/httpClient.h>
 #include <api/transport/network_types.h>
+#include <rtc_base/physical_socket_server.h>
 
+#include "../utils/Errors.hpp"
 #include "../utils/Utils.hpp"
 #include "../network/NetworkID.hpp"
 #include "../network/PeerRecordTable.hpp"
 #include "../encryption/OpenSSLAesAdapter.hpp"
-#include "../network/packets/DiscoveryResponsePacket.hpp"
+
+namespace {
+	const char* TryMakePacketStorage(const char* data);
+	NetherNet::ErrorOr<rtc::PhysicalSocket*, std::system_error> TryCreateDualStackIPv6Socket(rtc::SocketServer* sock_server, uint16_t port);
+	NetherNet::ErrorOr<rtc::PhysicalSocket*, std::system_error> TryCreateBroadcastSocket(rtc::SocketServer* sock_server, uint16_t port);
+	NetherNet::ErrorOr<std::unique_ptr<NetherNet::AesAdapter>, std::error_code> TryCreateEncryptedBroadcastSocket(rtc::SocketServer* sock_server, uint64_t key, uint16_t port);
+}
 
 namespace NetherNet {
+
+	extern in6_addr multi_cast_link_local;
+
 	class LanThreadManager : public rtc::Thread,
 							 public sigslot::has_slots<sigslot::single_threaded> {
 	public:
@@ -32,7 +43,7 @@ namespace NetherNet {
 		bool IsBroadcastDiscoveryEnabled(NetworkID id);
 		bool IsNetworkIdOnLan(NetworkID id);
 		void OnNetworkDiscoveryComplete();
-		void OnPacket(rtc::AsyncPacketSocket* socket, webrtc::ReceivedPacket const& packet);
+		void OnPacket(rtc::AsyncPacketSocket* socket, const char* data, uint64_t id, rtc::SocketAddress const& addr, int64_t const& id2);
 		void SendLanBroadcastRequest(NetherNet::NetworkID id);
 		void SendLanBroadcastResponse(rtc::SocketAddress const& addr, DiscoveryResponsePacket const& packet);
 		void SendSignalingMessageTo(NetworkID src, NetworkID dst, std::string const& data, std::function<void(std::error_code)>&& on_complete);
@@ -49,8 +60,10 @@ namespace NetherNet {
 		PeerRecordTable*							mPeerRecordTable;	//this + 0x120
 		rtc::AsyncPacketSocket*						mSocket;			//this + 0x180
 		rtc::SocketAddress							mSocketAddress;		//this + 0x188
+		int											mNetworkFamily;
 		std::unique_ptr<rtc::BasicNetworkManager>	mBasicNetworkMgr;	//this + 0x1D8
-		uint16_t									mEphemeralPort;		//this + 0x1E8
+		uint64_t									mEncryptionkey;		//this + 0x1E0
+		uint16_t									mEphemeralPort;		//this + 0x1E8 default port: 7551
 		std::set<NetworkID, std::less<NetworkID>>   mBroadcastIdList;	//this + 0x1F8
 		//TODO: std::set down here
 		std::set<rtc::IPAddress>					mAddressList;		//this + 0x208

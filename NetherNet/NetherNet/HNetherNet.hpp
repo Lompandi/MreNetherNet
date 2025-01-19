@@ -17,6 +17,10 @@
 
 #include "logging/LogSeverity.hpp"
 
+#include "network/packets/DiscoveryMessagePacket.hpp"
+#include "network/packets/DiscoveryRequestPacket.hpp"
+#include "network/packets/DiscoveryResponsePacket.hpp"
+
 namespace NetherNet {
 	ErrorOr<std::vector<uint8_t>, std::error_code> CreateKey(uint64_t id);
 	ErrorOr<std::unique_ptr<::NetherNet::AesContext>, std::error_code> CreateEnvelope(uint64_t id);
@@ -29,6 +33,10 @@ namespace NetherNet {
 		::NetherNet::ConnectError,
 		::NetherNet::CandidateAdd>> 
 	TryParseSignalingMessage(const std::string& message);
+
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryMessagePacket const& packet);
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryRequestPacket const& packet);
+	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryResponsePacket& packet);
 
 	extern LogSeverity g_LogServerity;
 }
