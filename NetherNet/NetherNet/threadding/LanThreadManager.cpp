@@ -104,7 +104,8 @@ namespace NetherNet {
 
 	void LanThreadManager::OnPacket(rtc::AsyncPacketSocket* socket, const char* data, uint64_t size, rtc::SocketAddress const& addr, int64_t const& id2) {
 
-		if (size >= 4 && size >= *reinterpret_cast<const uint16_t*>(data)) {
+		auto packet_hdr = (DiscoveryPacketHeader*)data;
+		if (size >= 4 && size >= packet_hdr->PacketLength()) {
 			auto dataStorage = TryMakePacketStorage(data);
 			if (dataStorage[1176]) {
 				//Fetch the network id

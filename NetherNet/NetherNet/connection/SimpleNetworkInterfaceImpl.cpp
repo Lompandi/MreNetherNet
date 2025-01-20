@@ -53,6 +53,10 @@ namespace NetherNet {
 		}
 	}
 
+	void SimpleNetworkInterfaceImpl::ClearPacketData(NetworkID id) {
+		mNetworkSessionMgr->ClearPacketData(id);
+	}
+
 	void SimpleNetworkInterfaceImpl::HandleDiscoveryPacketOnSignalThread(
 		rtc::SocketAddress& addr,
 		DiscoveryResponsePacket& packet
@@ -132,16 +136,16 @@ namespace NetherNet {
 		if (result.has_value()) {
 			auto& var = result.value();
 			if (std::holds_alternative<ConnectError>(var)) {
-				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectError>(var), channelId);
+				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectError>(var), channelId);
 			}
 			else if (std::holds_alternative<ConnectResponse>(var)) {
-				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectResponse>(var), channelId);
+				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectResponse>(var), channelId);
 			}
 			else if (std::holds_alternative<CandidateAdd>(var)) {
-				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<CandidateAdd>(var), channelId);
+				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<CandidateAdd>(var), channelId);
 			}
 			else if (std::holds_alternative<ConnectRequest>(var)) {
-				//mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectRequest>(var), channelId);
+				mNetworkSessionMgr->ProcessSignal(remoteId, std::get<ConnectRequest>(var), channelId);
 			}
 		}else if(message.find("Username") != std::string::npos){
 			ProcessTurnConfig(message);
@@ -229,7 +233,7 @@ namespace NetherNet {
 
 	bool SimpleNetworkInterfaceImpl::IsPacketAvailable(NetworkID remoteId, uint32_t* pcbMessageSize) {
 		std::lock_guard<std::mutex> lock(mConnectionMtx);
-		//return mNetworkSessionMgr->IsPacketAvailable(remoteId, pcbMessageSize);
+		return mNetworkSessionMgr->IsPacketAvailable(remoteId, pcbMessageSize);
 	}
 
 	void SimpleNetworkInterfaceImpl::ReceiveFromLanSignalingChannel(NetworkID remoteId, std::string const& data) {
@@ -258,5 +262,10 @@ namespace NetherNet {
 
 	void SimpleNetworkInterfaceImpl::ProcessSessionError(NetworkID remoteId, ESessionError err) {
 		//TODO
+	}
+
+	bool SimpleNetworkInterfaceImpl::CloseSessionWithUser(NetworkID id) {
+		std::lock_guard lock(mConnectionMtx);
+		return mNetworkSessionMgr->CloseSessionWithUser(id);
 	}
 }

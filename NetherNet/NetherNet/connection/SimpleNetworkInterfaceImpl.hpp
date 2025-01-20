@@ -15,11 +15,11 @@
 
 #include "../network/SignalingChannelId.hpp"
 #include "../network/packets/ESessionError.hpp"
+#include "../network/NetworkSessionManager.hpp"
 
 namespace NetherNet { struct SessionState; }
 namespace NetherNet { struct StunRelayServer; }
 namespace NetherNet { struct ERelayServerConfigurationResult; }
-namespace NetherNet { class NetworkSessionManager; }
 
 namespace NetherNet {
 	struct SimpleNetworkInterfaceImpl {
@@ -27,7 +27,7 @@ namespace NetherNet {
 
 		void AcceptSessionWithUser(NetworkID id);
 		void ClearPacketData(NetworkID id);
-		void CloseSessionWithUser(NetworkID id);
+		bool CloseSessionWithUser(NetworkID id);
 		void DisableBroadcastDiscovery();
 		void DisableSignalingOverLAN();
 		void EnableBroadcastDiscovery();
@@ -58,9 +58,9 @@ namespace NetherNet {
 		void UpdateConfigWithRelayToken(webrtc::PeerConnectionInterface::RTCConfiguration* pRtcConfig);
 	public:
 		NetworkID								mRemoteId;				// this + 0x008
-		INetherNetTransportInterfaceCallbacks*  mCallBack;			// this + 0x010
+		INetherNetTransportInterfaceCallbacks*  mCallBack;				// this + 0x010
 		NetworkID								mReceiverId;			// this + 0x018
-		//std::shared_ptr<NetworkSessionManager>	mNetworkSessionMgr;		// this + 0x020
+		NetworkSessionManager*					mNetworkSessionMgr;		// this + 0x020
 		std::mutex								mConnectionMtx;			// this + 0x030
 		std::string								mUsernameCert;			// this + 0x1E8
 		std::string								mPasswordCert;			// this + 0x208

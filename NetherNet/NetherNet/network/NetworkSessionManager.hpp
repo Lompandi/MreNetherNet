@@ -8,11 +8,34 @@
 #include "signaling/CandidateAdd.hpp"
 
 #include "../connection/SimpleNetworkInterfaceImpl.hpp"
+#include "../connection/NetworkSession.hpp"
 
 namespace NetherNet {
 	class NetworkSessionManager {
 	public:
-		void AcceptSessionWithUser(NetworkID& id);
+		struct NetworkSessionRecord {
+		public:
+			NetworkSession* mOwnSession;	//this + 0x0
+			NetworkID		mConnectionId;  //this + 0x20
+		};
+
+		bool AcceptSessionWithUser(NetworkID id);
+
+		void ClearPacketData(NetworkID id);
+
+		void CloseSessionIfInactive(NetworkID id, NetworkSessionRecord& record);
+
+		bool CloseSessionWithUser(NetworkID id);
+
+		bool FilterDeadSession(NetworkID id, NetworkSessionRecord& record);
+
+		NetworkSession* GetCurrentSession(NetworkID id);
+
+		bool GetSessionState(NetworkID id, SessionState* outState);
+
+		bool HasKnownConnection(NetworkID id);
+
+		bool InitiateIncomingSession(NetworkID id, uint64_t const& connectionId, std::unique_ptr<webrtc::SessionDescriptionInterface> iface, SignalingChannelId sig_channel_id);
 
 		void ProcessSignal(
 			NetworkID remoteId,
@@ -39,7 +62,12 @@ namespace NetherNet {
 		);
 
 		bool IsPacketAvailable(NetworkID id, uint32_t* mcbMessage);
+
+
 	public:
-		SimpleNetworkInterfaceImpl* mSimpleNetworkInterface;	//this + 0xC0
+		std::map<NetworkID, std::vector<uint8_t>>		mPacketData;				//this + 0x0
+		std::mutex										mQueuedPacketsMutex;		//this + 0x60
+		std::map<NetworkID, NetworkSessionRecord>		mSessionList;				//this + 0xB0
+		SimpleNetworkInterfaceImpl*						mSimpleNetworkInterface;	//this + 0xC0
 	};
 }

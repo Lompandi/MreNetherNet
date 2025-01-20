@@ -13,6 +13,7 @@
 
 namespace NetherNet {
 	class NetworkSession : public webrtc::PeerConnectionObserver {
+		friend class NetworkSessionManager;
 	public:
 		enum class ENegotiationState : int {
 			None = 0,
@@ -21,6 +22,8 @@ namespace NetherNet {
 			ICEProcessing = 3,
 		};
 
+		NetworkSession(NetworkSessionManager* mgr, std::optional<SignalingChannelId> channel_id) :
+			webrtc::PeerConnectionObserver() {};
 
 		void AcceptSession();
 		void ApplyConnectionFlags(webrtc::PeerConnectionInterface::RTCConfiguration* config, uint32_t flag);
