@@ -27,7 +27,9 @@ namespace NetherNet {
 
 		bool CloseSessionWithUser(NetworkID id);
 
-		bool FilterDeadSession(NetworkID id, NetworkSessionRecord& record);
+		bool FilterDeadSession(NetworkID id, NetworkSessionRecord& record) const;
+
+		NetworkSession* FindSpecificSession(NetworkID id, uint64_t const& connectionid);
 
 		NetworkSession* GetCurrentSession(NetworkID id);
 
@@ -36,6 +38,12 @@ namespace NetherNet {
 		bool HasKnownConnection(NetworkID id);
 
 		bool InitiateIncomingSession(NetworkID id, uint64_t const& connectionId, std::unique_ptr<webrtc::SessionDescriptionInterface> iface, SignalingChannelId sig_channel_id);
+		NetworkSession* InitiateOutgoingSession(NetworkID id);
+		bool IsPacketAvailable(NetworkID id, uint32_t* mcbMessage);
+
+		void OnRemoteMessageReceived(NetworkID id, void const* pdata, size_t size);
+
+		bool OpenSessionWithUser(NetworkID id);
 
 		void ProcessSignal(
 			NetworkID remoteId,
@@ -61,8 +69,7 @@ namespace NetherNet {
 			SignalingChannelId id
 		);
 
-		bool IsPacketAvailable(NetworkID id, uint32_t* mcbMessage);
-
+		void RemoteMessageReceived(NetworkID id, void const* pdata, size_t size);
 
 	public:
 		std::map<NetworkID, std::vector<uint8_t>>		mPacketData;				//this + 0x0

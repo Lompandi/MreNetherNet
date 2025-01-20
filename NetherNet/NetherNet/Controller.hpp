@@ -9,6 +9,12 @@ namespace NetherNet::RunLoop {
 		Stopped,
 	};
 
+	struct Variables {
+		ThreadState				mThreadState;
+		std::mutex				mMutex;
+		std::condition_variable mCondiVar;
+	};
+
 	class Condition {
 	public:
 		std::unique_lock<std::mutex> AcquireLock();

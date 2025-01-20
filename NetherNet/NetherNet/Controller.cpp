@@ -56,8 +56,10 @@ namespace NetherNet::RunLoop {
 
 	void Controller::UpdateSharedState(ThreadState state) const {
 		auto lock = mCondition->AcquireLock();
+		lock.lock();
 		auto state_before = mCondition->mState;
 		mCondition->mState = state;
+		lock.unlock();
 		if (state != state_before)
 			mCondition->cv.notify_all();
 	}

@@ -41,7 +41,7 @@ namespace NetherNet {
 		void InitializeOutgoing(NetworkID remoteID);
 
 		bool IsConnectionAlive() const;
-		ESessionError IsDeadSession(std::chrono::seconds negotiationTimeout);
+		bool IsDeadSession(std::chrono::seconds negotiationTimeout);
 		bool IsInactiveSession();
 
 

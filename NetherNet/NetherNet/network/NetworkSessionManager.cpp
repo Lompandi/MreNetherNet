@@ -108,12 +108,134 @@ namespace NetherNet {
 			session_record.mOwnSession = nullptr;
 		}
 
-		//TODO
-		NetworkSession updated_session(this, std::nullopt);
+		//TODO: Fix NetworkSession constructor
+		/*NetworkSession updated_session(this, std::nullopt);
 		updated_session.InitializeIncoming(id, connectionId, std::move(iface), sig_channel_id);
 		auto& updated_session_rec = mSessionList[id];
 		updated_session_rec.mOwnSession = &updated_session;
-
+		*/
 		return true;
+	}
+
+	NetworkSession* NetworkSessionManager::InitiateOutgoingSession(NetworkID id) {
+		auto it = mSessionList.lower_bound(id);
+		if (it != mSessionList.end() && it->first == id)
+			return it->second.mOwnSession;
+
+		ClearPacketData(id);
+		auto current_session = GetCurrentSession(id);
+		if (!current_session) {
+			/*
+			TODO: Fix NetworkSession constructor
+
+			NetworkSession new_session(this, std::nullopt);
+			new_session.InitializeOutgoing(id);
+			
+			mSessionList[id].mOwnSession = &new_session;
+			return mSessionList[id].mOwnSession;*/
+		}
+		return current_session;
+	}
+
+	bool NetworkSessionManager::FilterDeadSession(NetworkID id, NetworkSessionRecord& record) const {
+		if (record.mOwnSession == nullptr)
+			return false;
+
+		auto session = record.mOwnSession;
+
+		auto negotiationTimeOut = mSimpleNetworkInterface->GetNegotiationTimeout();
+		if (!session->IsDeadSession(negotiationTimeOut))
+			return false;
+
+		auto conn_id_str = std::to_string(record.mConnectionId);
+		NetherNet::NetherNetTransport_LogMessage(
+			4,
+			"[%llu] Deleting dead session: [RemoteID: %llu] [ConnectionId: %s]",
+			mSimpleNetworkInterface->mReceiverId,
+			id,
+			conn_id_str.c_str());
+
+		auto signal_thread = getSignalThread();
+		if (signal_thread->IsOnThread()) {
+			record.mOwnSession = nullptr;
+		}
+		else {
+			// If not on the signal thread, we post the task to another thread
+			auto rtc_thread = signal_thread->LoadRtcThread();
+			if (rtc_thread) {
+				rtc_thread->PostTask([&]() {
+					record.mOwnSession = nullptr;
+				});
+			}
+		}
+		return true;
+	}
+
+	NetworkSession* 
+	NetworkSessionManager::FindSpecificSession(NetworkID id, uint64_t const& connectionid) {
+		auto it = mSessionList.find(id);
+		if (it == mSessionList.end())
+			return nullptr;
+
+		if (it->second.mOwnSession != nullptr)
+			if (it->second.mConnectionId == connectionid)
+				return it->second.mOwnSession;
+		return nullptr;
+	}
+
+	bool 
+	NetworkSessionManager::IsPacketAvailable(NetworkID id, uint32_t* mcbMessage) {
+		std::lock_guard lock(mQueuedPacketsMutex);
+		auto data_elem = mPacketData.find(id);
+
+		if (data_elem == mPacketData.end())
+			return false;
+
+		*mcbMessage = data_elem->second.size();
+		return true;
+	}
+
+	void 
+	NetworkSessionManager::OnRemoteMessageReceived(NetworkID id, void const* pdata, size_t size) {
+		if (size)
+			RemoteMessageReceived(id, pdata, size);
+	}
+
+	bool 
+	NetworkSessionManager::OpenSessionWithUser(NetworkID id) {
+		/*std::lock_guard lock(mQueuedPacketsMutex);
+		NetherNet::NetherNetTransport_LogMessage(4, "Trying to open connection to %llu", id);
+
+		auto record_elem = mSessionList.find(id);
+		SessionState session_state;
+
+		if (record_elem != mSessionList.end()) {
+			auto session = record_elem->second;
+			session_state is_established = session.mOwnSession->GetSessionState();
+			if (is_established) {
+				NetherNet::NetherNetTransport_LogMessage(
+					2,
+					"[%llu] Outgoing session already established or being established: [RemoteID: %llu]",
+					mSimpleNetworkInterface->mReceiverId,
+					id);
+				return false;
+			}
+		}
+		if (!is_established) {
+			InitiateOutgoingSession(id);
+			NetherNet::NetherNetTransport_LogMessage(4, "Successfully scheduled to open a connection to %llu", id);
+			return true;
+		}
+		NetherNet::NetherNetTransport_LogMessage(
+			2,
+			"[%llu] Outgoing session has an error: [RemoteID: %llu]",
+			mSimpleNetworkInterface->mReceiverId,
+			id);
+		return false;*/
+	}
+
+	void 
+	NetworkSessionManager::RemoteMessageReceived(NetworkID id, void const* pdata, size_t size) {
+
 	}
 }

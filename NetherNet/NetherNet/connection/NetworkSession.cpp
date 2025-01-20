@@ -134,10 +134,10 @@ namespace NetherNet {
 		return ((mConnectionStat - 4) & 0xFFFFFFFD) != 0;
 	}
 
-	ESessionError NetworkSession::IsDeadSession(std::chrono::seconds negotiationTimeout) {
+	bool NetworkSession::IsDeadSession(std::chrono::seconds negotiationTimeout) {
 		if (IsConnectionAlive()) {
 			if (mConnNegotiationState == ENegotiationState::ICEProcessing)
-				return ESessionError::ESessionErrorNone;
+				return false;
 
 			//...TODO
 		}
