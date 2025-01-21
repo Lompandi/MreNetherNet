@@ -9,7 +9,6 @@
 #include "MyStatsObserver.hpp"
 #include "../network/ESendType.hpp"
 #include "../network/NetworkID.hpp"
-#include "SimpleNetworkInterfaceImpl.hpp"
 #include "../network/NetworkSessionManager.hpp"
 
 namespace NetherNet {

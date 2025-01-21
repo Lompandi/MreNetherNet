@@ -2,10 +2,10 @@
 #include <cstdint>
 
 namespace NetherNet {
-    struct ConfigurationEntry {
-        const char* url;
-        const char* username;
-        const char* password;
+    struct StunRelayServer {
+        const char* Uri;
+        const char* Username;
+        const char* Password;
     };
 
     struct NetherNetTransportServerConfiguration {
@@ -19,7 +19,8 @@ namespace NetherNet {
         };
 
     public:
-        ConfigurationEntry* mIceServerEntry;
-        size_t              mIceServerEntryCount;
+        StunRelayServer     StunRelayServers[16];
+        size_t              StunRelayServerCount;
+
     };
 }

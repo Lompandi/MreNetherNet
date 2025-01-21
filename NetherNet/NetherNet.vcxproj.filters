@@ -87,6 +87,9 @@
     <ClCompile Include="NetherNet\connection\MyCreateSessionDescriptionObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetherNet\network\AsyncResolverFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetherNet\encryption\AesContext.hpp">
@@ -246,6 +249,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetherNet\connection\MySetSessionDescriptionObserver.cpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetherNet\connection\IWebRTCSignalingInterface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

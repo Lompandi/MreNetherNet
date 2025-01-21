@@ -153,6 +153,7 @@
     <ClCompile Include="NetherNet\encryption\OpenSSLAesAdapter.cpp" />
     <ClCompile Include="NetherNet\encryption\OpenSSLInterface.cpp" />
     <ClCompile Include="NetherNet\HNetherNet.cpp" />
+    <ClCompile Include="NetherNet\network\AsyncResolverFactory.cpp" />
     <ClCompile Include="NetherNet\network\NetworkSessionManager.cpp" />
     <ClCompile Include="NetherNet\network\packets\DiscoveryResponsePacket.cpp" />
     <ClCompile Include="NetherNet\network\PeerRecordTable.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="NetherNet\utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NetherNet\connection\IWebRTCSignalingInterface.hpp" />
     <ClInclude Include="NetherNet\connection\MyCreateSessionDescriptionObserver.hpp" />
     <ClInclude Include="NetherNet\connection\MySetSessionDescriptionObserver.hpp" />
     <ClInclude Include="NetherNet\connection\MySetSessionDescriptionObserver.cpp" />

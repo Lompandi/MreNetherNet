@@ -1,3 +1,7 @@
+#ifndef H_NETHER_NET_HPP
+#define H_NETHER_NET_HPP
+
+
 #pragma once
 
 #include <vector>
@@ -40,3 +44,5 @@ namespace NetherNet {
 
 	extern LogSeverity g_LogServerity;
 }
+
+#endif

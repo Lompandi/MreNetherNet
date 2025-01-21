@@ -11,6 +11,7 @@
 #include "MySetSessionDescriptionObserver.hpp"
 #include "../threadding/RtcThreadManager.hpp"
 #include "../network/AsyncResolverFactory.hpp"
+#include "../connection/SimpleNetworkInterfaceImpl.hpp"
 
 namespace NetherNet {
 	void NetworkSession::UpdateSessionActivity() {
@@ -30,14 +31,13 @@ namespace NetherNet {
 		
 		auto thread = signalThread->LoadRtcThread();
 		if (thread) {
-			//TODO;	
 			rtc::CopyOnWriteBuffer send_buf(mSendBuffer);
 			
 			auto rtc_thread = signalThread->LoadRtcThread();
 			if (rtc_thread) {
 				rtc_thread->PostTask([&]() {
 					if (mpPeerConnection.get() != nullptr) {
-						if (/*TODO*/true) {
+						if (send_type == ESendType::eSendTypeReliable) {
 							if (!mReliableChannelInterface
 								|| mReliableChannelState != webrtc::DataChannelInterface::DataState::kOpen) {
 								mReliablePackets.push_back(send_buf);
@@ -309,6 +309,14 @@ namespace NetherNet {
 
 	bool NetworkSession::IsConnectionAlive() const {
 		return ((mConnectionStat - 4) & 0xFFFFFFFD) != 0;
+	}
+
+	/*
+	 Check if the session is beging inactive in the past minute
+	*/
+	bool NetworkSession::IsInactiveSession() {
+		auto& last_sess_activity = mLastSessionActivity;
+		return std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - last_sess_activity.load()) > std::chrono::minutes(1);
 	}
 
 	bool NetworkSession::IsDeadSession(std::chrono::seconds negotiationTimeout) {

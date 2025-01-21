@@ -7,7 +7,7 @@ namespace NetherNet {
 	class INetherNetTransportInterfaceCallbacks {
 	public:
 		// vIndex: 0 (+0)
-		virtual void  OnSessionGetConnectionFlags(NetworkID remoteId, uint32_t flag) = 0;
+		virtual void  OnSessionGetConnectionFlags(NetworkID remoteId, uint32_t* out_flag) = 0;
 
 		// vIndex: 1 (+8)
 		virtual bool OnSessionRequested(NetworkID remoteId, uint64_t sessionId) = 0;

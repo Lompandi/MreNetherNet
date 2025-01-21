@@ -1,4 +1,5 @@
 
+#include "../connection/NetworkSession.hpp"
 #include "NetworkSessionManager.hpp"
 #include "../HNetherNet.hpp"
 
@@ -42,7 +43,7 @@ namespace NetherNet {
 
 			auto conn_id_str = std::to_string(record.mConnectionId);
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[%llu] Closing inactive session: [RemoteID: %llu] [ConnectionId: %s]",
 				mSimpleNetworkInterface->mReceiverId,
 				id,
@@ -79,7 +80,7 @@ namespace NetherNet {
 				if (connectionId == current_session->mConnectionId) {
 					auto conn_id_str = std::to_string(connectionId);
 					NetherNet::NetherNetTransport_LogMessage(
-						2,
+						LogSeverity::Error,
 						"[%llu] Ignoring incoming connection because it overlaps with existing outgoing connection: [RemoteID: %llu] [C"
 						"onnectionId: %s]",
 						mSimpleNetworkInterface->mReceiverId,
@@ -149,7 +150,7 @@ namespace NetherNet {
 
 		auto conn_id_str = std::to_string(record.mConnectionId);
 		NetherNet::NetherNetTransport_LogMessage(
-			4,
+			LogSeverity::Information,
 			"[%llu] Deleting dead session: [RemoteID: %llu] [ConnectionId: %s]",
 			mSimpleNetworkInterface->mReceiverId,
 			id,
@@ -204,7 +205,7 @@ namespace NetherNet {
 	bool 
 	NetworkSessionManager::OpenSessionWithUser(NetworkID id) {
 		/*std::lock_guard lock(mQueuedPacketsMutex);
-		NetherNet::NetherNetTransport_LogMessage(4, "Trying to open connection to %llu", id);
+		NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "Trying to open connection to %llu", id);
 
 		auto record_elem = mSessionList.find(id);
 		SessionState session_state;
@@ -223,7 +224,7 @@ namespace NetherNet {
 		}
 		if (!is_established) {
 			InitiateOutgoingSession(id);
-			NetherNet::NetherNetTransport_LogMessage(4, "Successfully scheduled to open a connection to %llu", id);
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "Successfully scheduled to open a connection to %llu", id);
 			return true;
 		}
 		NetherNet::NetherNetTransport_LogMessage(
@@ -232,6 +233,14 @@ namespace NetherNet {
 			mSimpleNetworkInterface->mReceiverId,
 			id);
 		return false;*/
+	}
+
+	void 
+	NetworkSessionManager::ProcessError(NetworkID networkIDRemote, ESessionError err) {
+		std::lock_guard lock(mQueuedPacketsMutex);
+		auto cur_session = GetCurrentSession(networkIDRemote);
+		if (cur_session)
+			cur_session->ProcessError(err);
 	}
 
 	void 

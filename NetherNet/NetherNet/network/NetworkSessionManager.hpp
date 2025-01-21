@@ -1,5 +1,7 @@
-#pragma once
+#ifndef NETWORK_SESSION_MANAGER_HPP
+#define NETWORK_SESSION_MANAGER_HPP
 
+#pragma once
 #include "NetworkID.hpp"
 
 #include "signaling/ConnectError.hpp"
@@ -8,7 +10,9 @@
 #include "signaling/CandidateAdd.hpp"
 
 #include "../connection/SimpleNetworkInterfaceImpl.hpp"
-#include "../connection/NetworkSession.hpp"
+
+namespace NetherNet { class NetworkSession; }
+namespace NetherNet { struct SessionState; }
 
 namespace NetherNet {
 	class NetworkSessionManager {
@@ -69,6 +73,8 @@ namespace NetherNet {
 			SignalingChannelId id
 		);
 
+		void ProcessError(NetworkID networkIDRemote, ESessionError err);
+
 		void RemoteMessageReceived(NetworkID id, void const* pdata, size_t size);
 
 	public:
@@ -78,3 +84,5 @@ namespace NetherNet {
 		SimpleNetworkInterfaceImpl*						mSimpleNetworkInterface;	//this + 0xC0
 	};
 }
+
+#endif
