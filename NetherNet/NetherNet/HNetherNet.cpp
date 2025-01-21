@@ -60,7 +60,7 @@ namespace NetherNet {
 		return std::make_unique<AesContext>(Key.value());
 	}
 
-	void NetherNetTransport_LogMessage(int serverity, const char* msg, ...) {
+	void NetherNetTransport_LogMessage(NetherNet::LogSeverity serverity, const char* msg, ...) {
 		va_list va;
 		va_start(va, msg);
 

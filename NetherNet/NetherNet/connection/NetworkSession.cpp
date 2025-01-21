@@ -7,14 +7,17 @@
 #include "../HNetherNet.hpp"
 #include "NetworkSession.hpp"
 #include "MyDataChannelObserver.hpp"
+#include "MyCreateSessionDescriptionObserver.hpp"
+#include "MySetSessionDescriptionObserver.hpp"
 #include "../threadding/RtcThreadManager.hpp"
+#include "../network/AsyncResolverFactory.hpp"
 
 namespace NetherNet {
 	void NetworkSession::UpdateSessionActivity() {
+		mLastSessionActivity = std::chrono::steady_clock::now();
 		return;
 	}
 
-	//TODO 
 	void NetworkSession::SendPacket(
 		const char* pdata,
 		uint32_t	cbdata,
@@ -23,11 +26,38 @@ namespace NetherNet {
 		UpdateSessionActivity();
 		auto signalThread = getSignalThread();
 
-		rtc::CopyOnWriteBuffer mSendBuffer(cbdata, cbdata);
+		rtc::CopyOnWriteBuffer mSendBuffer(pdata, cbdata);
 		
 		auto thread = signalThread->LoadRtcThread();
 		if (thread) {
-			//...
+			//TODO;	
+			rtc::CopyOnWriteBuffer send_buf(mSendBuffer);
+			
+			auto rtc_thread = signalThread->LoadRtcThread();
+			if (rtc_thread) {
+				rtc_thread->PostTask([&]() {
+					if (mpPeerConnection.get() != nullptr) {
+						if (/*TODO*/true) {
+							if (!mReliableChannelInterface
+								|| mReliableChannelState != webrtc::DataChannelInterface::DataState::kOpen) {
+								mReliablePackets.push_back(send_buf);
+								return;
+							}
+							webrtc::DataBuffer send_buf_m(send_buf, true);
+							mReliableChannelInterface->Send(send_buf_m);
+							return;
+						}
+						if (mUnreliableChannelInterface.get() != nullptr
+							&& mUnreliableChannelState == webrtc::DataChannelInterface::DataState::kOpen) {
+							webrtc::DataBuffer send_buf_m(send_buf, true);
+							mUnreliableChannelInterface->Send(send_buf_m);
+							return;
+						}
+						mUnreliablePackets.push_back(send_buf);
+						return;
+					}
+				});
+			}
 		}
 	}
 
@@ -41,7 +71,7 @@ namespace NetherNet {
 		}
 		else {
 			NetherNet::NetherNetTransport_LogMessage(
-				2,
+				LogSeverity::Error,
 				"[%llu] Error: Trying to accept when no accept pending.",
 				mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId
 			);
@@ -53,7 +83,7 @@ namespace NetherNet {
 
 		std::string str_connection_id = std::to_string(mConnectionId);
 		::NetherNet::NetherNetTransport_LogMessage(
-			4,
+			LogSeverity::Information,
 			"[%llu] Queueing connection response : [RemoteID: %llu] [ConnectionID: %s]",
 			mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
 			mRemoteID,
@@ -63,26 +93,53 @@ namespace NetherNet {
 		auto signal_thread = getSignalThread();
 		auto response_thread = signal_thread->LoadRtcThread();
 
-		/*response_thread->PostTask(
-			//TODO
-		);*/
+		if (response_thread) {
+			response_thread->PostTask([&]() {
+				if (mConnNegotiationState != ENegotiationState::WaitingForAccept
+					&& !mHasSentAcceptSession) {
+
+					auto session_observer = MyCreateSessionDescriptionObserver::Create(
+					[this](webrtc::SessionDescriptionInterface* desc) {
+						auto conn_id_str = std::to_string(mConnectionId);
+						NetherNet::NetherNetTransport_LogMessage(NetherNet::LogSeverity::Information, "CreateAnswer called back for %s", conn_id_str.c_str());
+						//TODO
+					},
+					[this](webrtc::RTCError const& err) {
+						auto conn_id_str = std::to_string(mConnectionId);
+						auto err_msg = err.message();
+
+						NetherNet::NetherNetTransport_LogMessage(
+							NetherNet::LogSeverity::Error,
+							"CreateAnswer failed for %s with error \"%s\"",
+							conn_id_str.c_str(),
+							err_msg);
+
+						mNetworkSessionMgr->mSimpleNetworkInterface->NotifyOnSessionClose(
+							mRemoteID,
+							ESessionError::ESessionErrorFailedToCreateAnswer
+						);
+					});
+				}
+			});
+		}
 	}
 
 	void NetworkSession::ApplyConnectionFlags(
 		webrtc::PeerConnectionInterface::RTCConfiguration* config,
 		uint32_t flag) {
-		if ((flag & 1) != 0)
+		if ((flag & 1) != 0) {
 			config->type = webrtc::PeerConnectionInterface::IceTransportsType::kRelay;
+		}
 		if ((flag & 2) != 0)
-			config->candidate_network_policy = webrtc::PeerConnectionInterface::CandidateNetworkPolicy::kCandidateNetworkPolicyLowCost;
+			config->tcp_candidate_policy = webrtc::PeerConnectionInterface::TcpCandidatePolicy::kTcpCandidatePolicyDisabled;
 		mConnectionFlag = flag;
 	}
 
-	void NetworkSession::CheckSendDeferredData(webrtc::DataChannelInterface* iface) {
+	void NetworkSession::CheckSendDeferredData() {
 		if (mReliableChannelInterface != 0) {
 			std::string connectionId = std::to_string(mConnectionId);
 			::NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[%llu] Sending %d packets of deferred reliable data. [RemoteID: %llu] [ConnectionID: %s]",
 				mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
 				mReliablePackets.size(),
@@ -99,7 +156,7 @@ namespace NetherNet {
 		if (mUnreliableChannelInterface != 0) {
 			std::string connectionId = std::to_string(mConnectionId);
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[%llu] Sending %d packets of deferred unreliable data. [RemoteID: %llu] [ConnectionID: %s]",
 				mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
 				mUnreliablePackets.size(),
@@ -114,11 +171,54 @@ namespace NetherNet {
 	}
 
 	void NetworkSession::CheckUpdateStats() {
-		//TODO
+		auto last_stats_update = mLastStatsUpdate;
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::steady_clock::now()
+			- last_stats_update
+		) >= std::chrono::milliseconds(2000)
+			&& !mStatsRequestInProgress) {
+			auto signal_thread = getSignalThread();
+			auto rtc_thread = signal_thread->LoadRtcThread();
+			if (rtc_thread) {
+				rtc_thread->PostTask([&]() {
+					//TODO
+				});
+			}
+			mStatsRequestInProgress = true;
+			mLastStatsUpdate = std::chrono::steady_clock::now();
+		}
 	}
 
 	bool NetworkSession::GetSessionState(SessionState* outState) {
-		//TODO
+		if (outState == nullptr)
+			return false;
+
+		outState->TotalPacketsSent = 0;
+		outState->TotalBytesSentPerSecond = 0;
+		outState->BytesSendBuffer = 0;
+		outState->ConnectionActive = 0;
+		outState->IceConnectionState = webrtc::PeerConnectionInterface::kIceConnectionNew;
+
+		auto current_state = mIceConnectionState;
+		if ((uint32_t)current_state <= webrtc::PeerConnectionInterface::kIceConnectionChecking)
+			outState->Connecting = true;
+		if (current_state == webrtc::PeerConnectionInterface::kIceConnectionCompleted
+			|| current_state == webrtc::PeerConnectionInterface::kIceConnectionConnected
+			|| current_state == webrtc::PeerConnectionInterface::kIceConnectionDisconnected) {
+			outState->ConnectionActive =
+				(mUnreliableChannelState == webrtc::DataChannelInterface::kOpen
+				&& mReliableChannelState == webrtc::DataChannelInterface::kOpen);
+		}
+		if (((current_state - 4) & 0xFFFFFFFD) == 0)
+			outState->HasSessionError == true;
+		outState->UsingRelay = mIsUsingRelay;
+		outState->CurrentRTT = mCurrentRTT;
+		outState->TotalBytesSent = mTotalBytesSent;
+		outState->TotalBytesReceived = mTotalBytesReceived;
+		outState->TotalPacketsLost = mTotalPacketLost;
+		outState->IceConnectionState = current_state;
+		CheckUpdateStats();
+		return true;
 	}
 
 	void NetworkSession::InitializeIncoming(
@@ -127,7 +227,84 @@ namespace NetherNet {
 		std::unique_ptr<webrtc::SessionDescriptionInterface> pSessionDesc,
 		SignalingChannelId  preference
 	) {
-		//TODO
+		UpdateSessionActivity();
+		mIsOutGoingSession = false;
+		mConnectionId = connectionId;
+		mRemoteID = remoteId;
+		mSignalingPreference = preference;
+
+		webrtc::PeerConnectionInterface::RTCConfiguration config(
+			mNetworkSessionMgr->mSimpleNetworkInterface->mRtcConfig
+		);
+
+		auto connection_flag = mNetworkSessionMgr->mSimpleNetworkInterface
+			->GetConnectionFlags(remoteId);
+
+		ApplyConnectionFlags(&config, connection_flag);
+		webrtc::PeerConnectionDependencies conn_deps(this);
+
+		auto workerThread = getWorkerThread();
+		auto rtcThread = workerThread->GetRtcThread();
+
+		//TODO:
+		auto resolver = std::make_unique<AsyncResolverFactory>();
+		//
+
+		conn_deps.async_dns_resolver_factory
+			= std::move(resolver);
+
+		auto peer_conn_factory =
+			mNetworkSessionMgr->mSimpleNetworkInterface->mpPeerConnectionFactory.get();
+
+		auto peer_conn_create =
+			peer_conn_factory->CreatePeerConnectionOrError(config, std::move(conn_deps));
+
+		if (!peer_conn_create.ok()) {
+			auto err_msg = peer_conn_create.error().message();
+			NetherNet::NetherNetTransport_LogMessage(
+				NetherNet::LogSeverity::Error,
+				"Failed to create incoming peer connection: %s",
+				err_msg);
+
+			mNetworkSessionMgr->mSimpleNetworkInterface
+				->NotifyOnSessionClose(mRemoteID, ESessionError::ESessionErrorFailedToCreatePeerConnection);
+			return;
+		}
+		
+		mpPeerConnection = peer_conn_create.MoveValue();
+		mConnNegotiationState = ENegotiationState::WaitingForAccept;
+		mNegotiationStateTimer = std::chrono::steady_clock::now();
+
+		auto conn_id_str = std::to_string(mConnectionId);
+		NetherNet::NetherNetTransport_LogMessage(
+			NetherNet::LogSeverity::Information,
+			"[%llu] Received incoming connection request: [RemoteID: %llu] [ConnectionId: %s]",
+			mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
+			mRemoteID,
+			conn_id_str.c_str());
+
+		rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_conn_state 
+			= std::move(mpPeerConnection);
+
+		auto sess_desc_observer = MySetSessionDescriptionObserver::Create(
+			[this]() {
+				if (!mIsDeleting) {
+					TrySendSessionResponse();
+					ProcessIceCandidates();
+				}
+			},
+			
+			[this](webrtc::RTCError const& err) {
+				mNetworkSessionMgr->mSimpleNetworkInterface
+					->NotifyOnSessionClose(mRemoteID, ESessionError::ESessionErrorFailedToSetRemoteDescription);
+			});
+		rtc::scoped_refptr<MySetSessionDescriptionObserver> uniq_desc_observer(
+			sess_desc_observer
+		);
+
+		peer_conn_state->SetRemoteDescription(
+			std::move(pSessionDesc), std::move(uniq_desc_observer)
+		);
 	}
 
 	bool NetworkSession::IsConnectionAlive() const {
@@ -135,11 +312,49 @@ namespace NetherNet {
 	}
 
 	bool NetworkSession::IsDeadSession(std::chrono::seconds negotiationTimeout) {
+		ESessionError notify_state;
 		if (IsConnectionAlive()) {
 			if (mConnNegotiationState == ENegotiationState::ICEProcessing)
 				return false;
 
-			//...TODO
+			auto negotiation_time
+				= mNegotiationStateTimer;
+
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(negotiationTimeout)
+				>= std::chrono::duration_cast<std::chrono::milliseconds>(
+					std::chrono::steady_clock::now()
+					- negotiation_time
+				))
+				return false;
+
+			/*
+			here, `notify_state` will be either:
+			ESessionErrorNegotiationTimeoutWaitingForResponse (14),
+			ESessionErrorNegotiationTimeoutWaitingForAccept (15),
+			depends on the `waiting-for` state
+			*/
+			notify_state = (ESessionError)((mConnNegotiationState == ENegotiationState::WaitingForResponse) ^ 0xF);
+		}
+		else {
+			notify_state = ESessionError::ESessionErrorICE;
+		}
+		mNetworkSessionMgr->mSimpleNetworkInterface
+			->NotifyOnSessionClose(mRemoteID, (ESessionError)notify_state);
+		return true;
+	}
+
+	void NetworkSession::OnDataChannelStateChange(webrtc::DataChannelInterface* iface) {
+		UpdateDataChannelStates();
+		CheckSendDeferredData();
+	}
+
+	void NetworkSession::Close() {
+		if (mpPeerConnection.get() != nullptr) {
+			auto signal_thread = getSignalThread();
+			auto rtc_thread = signal_thread->LoadRtcThread();
+			if (rtc_thread) {
+				//TODO
+			}
 		}
 	}
 
@@ -191,7 +406,7 @@ namespace NetherNet {
 		std::string connId = std::to_string(mConnectionId);
 
 		NetherNet::NetherNetTransport_LogMessage(
-			4,
+			LogSeverity::Information,
 			"[%llu] Peer Connection State Change: [State: %d] [RemoteID: %llu] [ConnectionId: %s]",
 			mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
 			new_state,
@@ -215,14 +430,14 @@ namespace NetherNet {
 
 		iface->RegisterObserver(std::move(observer.get()));
 		UpdateDataChannelStates();
-		CheckSendDeferredData(iface.get());
+		CheckSendDeferredData();
 	}
 
 	void NetworkSession::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) {
 		mIceConnectionState = new_state;
 		std::string connId = std::to_string(mConnectionId);
 		NetherNet::NetherNetTransport_LogMessage(
-			4,
+			LogSeverity::Information,
 			"[%llu] Ice Connection State Change: [State: %d] [RemoteID: %llu] [ConnectionId: %s]",
 			mNetworkSessionMgr->mSimpleNetworkInterface->mReceiverId,
 			new_state,
@@ -241,18 +456,72 @@ namespace NetherNet {
 	}
 
 	void NetworkSession::OnStatsRequestComplete(std::vector<webrtc::StatsReport const*> const& reports) {
-		//TODO
+		if (!reports.empty()) {
+			for (const auto& report : reports) {
+				if (report->id()->type() == webrtc::StatsReport::StatsType::kStatsReportTypeCandidatePair)
+					continue;
+
+				if (report->id()->type() == webrtc::StatsReport::kStatsReportTypeDataChannel) {
+					auto bytesSent = report->FindValue(webrtc::StatsReport::kStatsValueNameBytesSent);
+					if (bytesSent) {
+						auto bytes_sent_str = bytesSent->ToString();
+						//TODO
+					}
+				}
+			}
+		}
 	}
 
 	void NetworkSession::ProcessError(ESessionError err) {
 		mNetworkSessionMgr->mSimpleNetworkInterface->NotifyOnSessionClose(mRemoteID, err);
 	}
 
+	//TODO: figure this out
 	void NetworkSession::ProcessIceCandidates() {
-		//TODO
+		auto& network_interface = this->mNetworkSessionMgr->mSimpleNetworkInterface;
+		auto remote_id = this->mRemoteID;
+		auto connection_id = this->mConnectionId;
+
+		for (auto it = mDeferredIceCandidates.begin(); it != mDeferredIceCandidates.end();)
+		{
+			auto& ice_candidate = *it;
+			bool add_result = mpPeerConnection->AddIceCandidate(ice_candidate.get());
+			std::string connection_id_str = std::to_string(connection_id);
+
+			if (add_result) {
+				NetherNet::NetherNetTransport_LogMessage(
+					NetherNet::LogSeverity::Information,
+					"[%llu] Processed deferred ice candidate: [RemoteID: %llu] [ConnectionId: %s]",
+					network_interface->mReceiverId,
+					remote_id,
+					connection_id_str.c_str()
+				);
+
+				it = mDeferredIceCandidates.erase(it);
+			}
+			else {
+				NetherNet::NetherNetTransport_LogMessage(
+					NetherNet::LogSeverity::Information,
+					"[%llu] Unable to process deferred ice candidate: [RemoteID: %llu] [ConnectionId: %s]",
+					network_interface->mReceiverId,
+					remote_id,
+					connection_id_str.c_str()
+				);
+				++it;
+			}
+		}
 	}
 
 	void NetworkSession::SendToSignalingChannel(std::variant<ConnectRequest, ConnectResponse, ConnectError, CandidateAdd> const& sigvar) {
+		auto remoteId = mRemoteID;
+		auto pNetworkInterface = mNetworkSessionMgr->mSimpleNetworkInterface;
 
+		//auto send_result = pNetworkInterface
+			//->SendToSignalingChannel()
+	}
+
+	void NetworkSession::OnDataChannelMessage(webrtc::DataChannelInterface* iface, webrtc::DataBuffer const& data) {
+		UpdateSessionActivity();
+		mNetworkSessionMgr->OnRemoteMessageReceived(mRemoteID, data.data.data(), data.size());
 	}
 }

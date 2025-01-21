@@ -35,6 +35,8 @@ namespace NetherNet {
 	}
 
 	RtcThreadManager g_SignalThread;
+	RtcThreadManager g_WorkerThread;
 
 	RtcThreadManager* getSignalThread() { return &g_SignalThread; }
+	RtcThreadManager* getWorkerThread() { return &g_WorkerThread; }
 }

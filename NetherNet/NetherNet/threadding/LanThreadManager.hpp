@@ -61,6 +61,7 @@ namespace NetherNet {
 		rtc::AsyncPacketSocket*						mSocket;			//this + 0x180
 		rtc::SocketAddress							mSocketAddress;		//this + 0x188
 		int											mNetworkFamily;
+		rtc::SocketAddress							mBindAddress;		//this + 0x1B0
 		std::unique_ptr<rtc::BasicNetworkManager>	mBasicNetworkMgr;	//this + 0x1D8
 		uint64_t									mEncryptionkey;		//this + 0x1E0
 		uint16_t									mEphemeralPort;		//this + 0x1E8 default port: 7551

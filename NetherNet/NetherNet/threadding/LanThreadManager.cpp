@@ -18,7 +18,7 @@ namespace NetherNet {
 	in6_addr multi_cast_link_local;
 
 	void LanThreadManager::BeginNetworkDiscovery() {
-		NetherNet::NetherNetTransport_LogMessage(4, "[LAN] starting network discovery");
+		NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] starting network discovery");
 		auto network_mgr = std::make_unique<rtc::BasicNetworkManager>(mSocketServer);
 		mBasicNetworkMgr = std::move(network_mgr);
 
@@ -37,30 +37,25 @@ namespace NetherNet {
 
 		auto sendResult = 0;
 
-		if (!IsCurrent()) {
-			//BlockingCall();
+		if (mBindAddress.family() == AF_INET) {
+			if (addr.family() == AF_INET6) {
+				//Error
+			}
 		}
 
-		//TODO:
-		if (addr.ipaddr().family() != AF_INET) {
-			//Other network layer protocol used
-			rtc::PacketOptions packetOpt;
-			sendResult = mSocket->SendTo(data, size, addr, packetOpt);
-		}
-		else {
-			//Ipv6 processing
-			rtc::PacketOptions packetOpt;
-			auto ip6Addr = addr.ipaddr().AsIPv6Address();
-			auto sendPort = addr.port();
-
-			rtc::SocketAddress ip6SocksAddr;
-			ip6SocksAddr.FromString(ip6Addr.ToString());
-			sendResult = mSocket->SendTo(data, size, ip6SocksAddr, packetOpt);
+		if (mBindAddress.family() != AF_INET6 || addr.family() != AF_INET) {
+			rtc::PacketOptions empty_opt;
+			auto result = mSocket->SendTo(data, size, addr, empty_opt);
+			//Handle error code
 		}
 
-		if (sendResult == -1) {
-			//TODO: process error;
-		}
+		rtc::PacketOptions empty_opt;
+		auto& ipaddr = addr.ipaddr();
+		auto ip6addr = ipaddr.AsIPv6Address();
+		uint16_t port = addr.port();
+		rtc::SocketAddress dst_addr(ip6addr, port);
+		auto send_result = mSocket->SendTo(data, size, dst_addr, empty_opt);
+		//TODO
 	}
 
 	bool LanThreadManager::IsBroadcastDiscoveryEnabled(NetworkID id) {
@@ -86,7 +81,7 @@ namespace NetherNet {
 			std::string ipAddrStr = mAddressList.begin()->ToString();
 
 			::NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] [%llu] sending broadcast request to %s",
 				id,
 				ipAddrStr.data()
@@ -177,16 +172,16 @@ namespace NetherNet {
 			});
 		}
 		else {
-			NetherNet::NetherNetTransport_LogMessage(4, "[LAN] Stopping broadcast task, no more ids");
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] Stopping broadcast task, no more ids");
 			//TODO
 		}
 	}
 
 	void LanThreadManager::EnableBroadcastDiscovery(NetworkID id) {
 		if (IsCurrent()) {
-			NetherNet::NetherNetTransport_LogMessage(4, "[LAN] adding [%llu] to set of broadcast ids", id);
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] adding [%llu] to set of broadcast ids", id);
 			if (!false /*TODO*/ ) {
-				NetherNet::NetherNetTransport_LogMessage(4, "[LAN] starting broadcast task");
+				NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] starting broadcast task");
 
 				this->PostTask([&]() {
 					BroadcastTask();  //Start broadcasting
@@ -212,7 +207,7 @@ namespace NetherNet {
 	void LanThreadManager::DisableBroadcastDiscovery(NetworkID id) {
 		if (!IsCurrent())
 			return;
-		NetherNet::NetherNetTransport_LogMessage(4, "[LAN] removing [%llu] from set of broadcast ids", id);
+		NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] removing [%llu] from set of broadcast ids", id);
 		mBroadcastIdList.erase(id);
 	}
 
@@ -232,14 +227,14 @@ namespace NetherNet {
 						}
 
 						auto addr_str = IPv6AllHostsLinkLocal.ToString();
-						NetherNet::NetherNetTransport_LogMessage(4, "[LAN] adding %s to broadcast domain", addr_str.data());
+						NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] adding %s to broadcast domain", addr_str.data());
 
 
 					}
 					else {
 						if (family != AF_INET || rtc::IPIsLinkLocal(ip)) {
 							auto addr_str = ip.ToString();
-							NetherNet::NetherNetTransport_LogMessage(4, "[LAN] %s not viable for broadcast domain", addr_str.data());
+							NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] %s not viable for broadcast domain", addr_str.data());
 							//goto End
 						}
 
@@ -254,7 +249,7 @@ namespace NetherNet {
 						rtc::IPAddress addr(masked_ip);
 						auto addr_str = addr.ToString();
 
-						NetherNet::NetherNetTransport_LogMessage(4, "[LAN] adding %s to broadcast domain", addr_str.data());
+						NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] adding %s to broadcast domain", addr_str.data());
 
 						//TODO
 					}
@@ -269,7 +264,7 @@ namespace NetherNet {
 			if (mPeerRecordTable->Find(dst, &addr)) {
 				auto addr_str = addr.ToString();
 				NetherNet::NetherNetTransport_LogMessage(
-					4,
+					LogSeverity::Information,
 					"[%llu] sending signal to [%llu](%s) over LAN: '%s'",
 					src,
 					dst,
@@ -288,7 +283,7 @@ namespace NetherNet {
 				}
 			}
 			else {
-				NetherNet::NetherNetTransport_LogMessage(2, "[%llu] signaling message to [%llu] dropped, unknown peer", src, dst);
+				NetherNet::NetherNetTransport_LogMessage(LogSeverity::Error, "[%llu] signaling message to [%llu] dropped, unknown peer", src, dst);
 				if (on_complete) {
 					//TODO
 				}
@@ -345,7 +340,7 @@ namespace {
 
 			auto code = GetLastSystemError();
 
-			NetherNet::NetherNetTransport_LogMessage(4, "[LAN] socket failed: %s (%d)", code.what(), code.code().value());
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] socket failed: %s (%d)", code.what(), code.code().value());
 			return result_error{ code };
 		}
 
@@ -355,7 +350,7 @@ namespace {
 			auto err = std::system_error(errCode, std::system_category());
 
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] setsockopt(IPV6_V6ONLY) failed: %s (%d)",
 				err.what(),
 				err.code().value());
@@ -368,7 +363,7 @@ namespace {
 			auto errorCode = std::system_error(err, std::system_category());
 
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] setsockopt(SO_BROADCAST) failed: %s (%d)",
 				errorCode.what(),
 				errorCode.code().value());
@@ -381,7 +376,7 @@ namespace {
 			auto errorCode = std::system_error(err, std::system_category());
 
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] setsockopt(SO_RCVBUF) failed: %s (%d)",
 				errorCode.what(),
 				errorCode.code().value());
@@ -392,7 +387,7 @@ namespace {
 			auto err = ip6_socket->GetError();
 			auto errorCode = std::system_error(err, std::system_category());
 
-			NetherNet::NetherNetTransport_LogMessage(4, "[LAN] bind failed: %s (%d)", errorCode.what(), errorCode.code().value());
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] bind failed: %s (%d)", errorCode.what(), errorCode.code().value());
 			return result_error{ errorCode };
 		}
 
@@ -409,7 +404,7 @@ namespace {
 			auto errorCode = std::system_error(err, std::system_category());
 
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] setsockopt(IPV6_JOIN_GROUP) failed: %s (%d)",
 				errorCode.what(),
 				errorCode.code().value());
@@ -420,7 +415,7 @@ namespace {
 			auto errorCode = std::system_error(err, std::system_category());
 			
 			NetherNet::NetherNetTransport_LogMessage(
-				4,
+				LogSeverity::Information,
 				"[LAN] setsockopt(IPV6_MULTICAST_LOOP) failed: %s (%d)",
 				errorCode.what(),
 				errorCode.code().value());

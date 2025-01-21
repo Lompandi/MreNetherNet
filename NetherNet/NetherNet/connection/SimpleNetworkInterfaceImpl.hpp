@@ -5,6 +5,7 @@
 
 #include <rtc_base/socket_address.h>
 #include <api/peer_connection_interface.h>
+#include <pc/peer_connection_factory.h>
 
 #include "NetherNetTransportServerConfiguration.hpp"
 #include "INetherNetTransportInterfaceCallbacks.hpp"
@@ -17,7 +18,6 @@
 #include "../network/packets/ESessionError.hpp"
 #include "../network/NetworkSessionManager.hpp"
 
-namespace NetherNet { struct SessionState; }
 namespace NetherNet { struct StunRelayServer; }
 namespace NetherNet { struct ERelayServerConfigurationResult; }
 
@@ -57,11 +57,13 @@ namespace NetherNet {
 
 		void UpdateConfigWithRelayToken(webrtc::PeerConnectionInterface::RTCConfiguration* pRtcConfig);
 	public:
-		NetworkID								mRemoteId;				// this + 0x008
-		INetherNetTransportInterfaceCallbacks*  mCallBack;				// this + 0x010
-		NetworkID								mReceiverId;			// this + 0x018
-		NetworkSessionManager*					mNetworkSessionMgr;		// this + 0x020
-		std::mutex								mConnectionMtx;			// this + 0x030
+		NetworkID								mRemoteId;				// this + 0x08
+		INetherNetTransportInterfaceCallbacks*  mCallBack;				// this + 0x10
+		NetworkID								mReceiverId;			// this + 0x18
+		NetworkSessionManager*					mNetworkSessionMgr;		// this + 0x20
+		rtc::scoped_refptr<webrtc::PeerConnectionFactory>	mpPeerConnectionFactory;	// this + 0x28 
+		std::mutex								mConnectionMtx;			// this + 0x30
+		webrtc::PeerConnectionInterface::RTCConfiguration mRtcConfig;	// this + 0x80
 		std::string								mUsernameCert;			// this + 0x1E8
 		std::string								mPasswordCert;			// this + 0x208
 		bool									mDisableLANSignaling;	// this + 0x228

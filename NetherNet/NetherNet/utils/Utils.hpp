@@ -39,4 +39,6 @@ namespace NetherNet::Utils {
         T data; 
         mutable std::mutex mtx;
     };
+
+    using TimePoint = std::chrono::steady_clock::time_point;
 }

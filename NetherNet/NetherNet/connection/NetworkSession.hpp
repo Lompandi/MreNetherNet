@@ -5,6 +5,7 @@
 #include <api/scoped_refptr.h>
 #include <api/peer_connection_interface.h>
 
+#include "../utils/Utils.hpp"
 #include "MyStatsObserver.hpp"
 #include "../network/ESendType.hpp"
 #include "../network/NetworkID.hpp"
@@ -12,6 +13,21 @@
 #include "../network/NetworkSessionManager.hpp"
 
 namespace NetherNet {
+	struct SessionState {
+		bool   ConnectionActive;
+		bool   Connecting;
+		bool   HasSessionError;
+		bool   UsingRelay;
+		size_t CurrentRTT;
+		size_t BytesSendBuffer;
+		size_t TotalBytesSent;
+		size_t TotalBytesSentPerSecond;
+		size_t TotalBytesReceived;
+		size_t TotalPacketsSent;
+		size_t TotalPacketsLost;
+		webrtc::PeerConnectionInterface::IceConnectionState   IceConnectionState;
+	};
+
 	class NetworkSession : public webrtc::PeerConnectionObserver {
 		friend class NetworkSessionManager;
 	public:
@@ -27,7 +43,7 @@ namespace NetherNet {
 
 		void AcceptSession();
 		void ApplyConnectionFlags(webrtc::PeerConnectionInterface::RTCConfiguration* config, uint32_t flag);
-		void CheckSendDeferredData(webrtc::DataChannelInterface* iface);
+		void CheckSendDeferredData();
 		void CheckUpdateStats();
 		void Close();
 		bool GetSessionState(SessionState* outState);
@@ -64,23 +80,38 @@ namespace NetherNet {
 		void UpdateDataChannelStates();
 		void UpdateSessionActivity();
 	private:
-		//Exact type pending
-		ENegotiationState					mConnNegotiationState;	 //this + 0x08
-		std::chrono::seconds				mNegotiationStart;		 //this + 0x10
-		NetworkID							mConnectionId;			 //this + 0x20
-		NetworkID							mRemoteID;				 //this + 0x28
-		NetworkSessionManager*				mNetworkSessionMgr;		 //this + 0x50
-		webrtc::PeerConnectionInterface::IceConnectionState	 mIceConnectionState;	//this + 0x58
-		webrtc::PeerConnectionInterface::PeerConnectionState mPeerConnectionState;	//this + 0x5C
-		uint32_t							mConnectionStat;
-		MyStatsObserver						mStatsObserver;			 //this + 0x60
-		rtc::scoped_refptr<webrtc::DataChannelInterface> mUnreliableChannelInterface;	 //this + 0xD8
-		std::vector<rtc::CopyOnWriteBuffer>	mUnreliablePackets;		 //this + 0xE0
-		webrtc::DataChannelInterface::DataState mUnreliableChannelState; //this + 0xF8
+		ENegotiationState						mConnNegotiationState;					//this + 0x08
+		Utils::TimePoint						mNegotiationStateTimer;					//this + 0x10
+		bool									mIsOutGoingSession;
+		bool									mHasSentAcceptSession;					//this + 0x1A
+		bool									mStatsRequestInProgress;				//this + 0x1B
+		NetworkID								mConnectionId;							//this + 0x20
+		NetworkID								mRemoteID;								//this + 0x28
+		rtc::scoped_refptr<webrtc::PeerConnectionInterface> mpPeerConnection;			//this + 0x30
+		std::vector<std::unique_ptr<webrtc::IceCandidateInterface>> mDeferredIceCandidates; //this + 0x38
+		NetworkSessionManager*					mNetworkSessionMgr;						//this + 0x50
+		webrtc::PeerConnectionInterface::IceConnectionState	 mIceConnectionState;		//this + 0x58
+		webrtc::PeerConnectionInterface::PeerConnectionState mPeerConnectionState;		//this + 0x5C
+		uint32_t								mConnectionStat;
+		MyStatsObserver							mStatsObserver;							//this + 0x60
+		rtc::scoped_refptr<webrtc::DataChannelInterface> mUnreliableChannelInterface;	//this + 0xD8
+		std::vector<rtc::CopyOnWriteBuffer>		mUnreliablePackets;						//this + 0xE0
+		webrtc::DataChannelInterface::DataState mUnreliableChannelState;				//this + 0xF8
 		rtc::scoped_refptr<webrtc::DataChannelInterface>		mReliableChannelInterface;	//this + 0x100
-		std::vector<rtc::CopyOnWriteBuffer>	mReliablePackets;				//this + 0x108
+		std::vector<rtc::CopyOnWriteBuffer>		mReliablePackets;						//this + 0x108
+		rtc::SocketAddress						mLocalSocketAddress;					//this + 0x100 (lin)
+		rtc::SocketAddress						mRemoteSocketAddress;					//this + 0x148 (lin)
+		bool									mIsUsingRelay;							//this + 0x1C8
+		size_t									mCurrentRTT;							//this + 0x1D0 
+		size_t									mTotalBytesSent;						//this + 0x1E0
+		size_t									mTotalBytesReceived;					//this + 0x1F0 
+		size_t									mTotalPacketLost;						//this + 0x1F8	
+		bool									mIsDeleting;							//this + 0x1E8 (lin)
 		webrtc::DataChannelInterface::DataState	mReliableChannelState;
-		uint32_t								mConnectionFlag;		 //this + 0x208
+		Utils::TimePoint						mLastStatsUpdate;						//this + 0x200
+		uint32_t								mConnectionFlag;						//this + 0x208
+		std::atomic<std::chrono::steady_clock::time_point> mLastSessionActivity;		//this + 0x210
+		std::optional<SignalingChannelId>		mSignalingPreference;					//this + 0x228
 		/* 
 		Connection flag format: 
 		Bits:

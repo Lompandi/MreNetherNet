@@ -24,6 +24,8 @@ namespace NetherNet {
 	};
 
 	extern RtcThreadManager g_SignalThread;
+	extern RtcThreadManager g_WorkerThread;
 
 	RtcThreadManager* getSignalThread();
+	RtcThreadManager* getWorkerThread();
 }

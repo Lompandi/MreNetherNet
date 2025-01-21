@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="NetherNet.cpp" />
+    <ClCompile Include="NetherNet\connection\MyCreateSessionDescriptionObserver.cpp" />
     <ClCompile Include="NetherNet\connection\MyDataChannelObserver.cpp" />
     <ClCompile Include="NetherNet\connection\NetherNetConnector.cpp" />
     <ClCompile Include="NetherNet\connection\NetherNetServerLocator.cpp" />
@@ -163,6 +164,9 @@
     <ClCompile Include="NetherNet\utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NetherNet\connection\MyCreateSessionDescriptionObserver.hpp" />
+    <ClInclude Include="NetherNet\connection\MySetSessionDescriptionObserver.hpp" />
+    <ClInclude Include="NetherNet\connection\MySetSessionDescriptionObserver.cpp" />
     <ClInclude Include="NetherNet\connection\PingedCompatibleServer.hpp" />
     <ClInclude Include="NetherNet\connection\Connector.hpp" />
     <ClInclude Include="NetherNet\connection\DisconnectFailReason.hpp" />
@@ -188,6 +192,7 @@
     <ClInclude Include="NetherNet\HNetherNet.hpp" />
     <ClInclude Include="NetherNet\level\GameType.hpp" />
     <ClInclude Include="NetherNet\logging\LogSeverity.hpp" />
+    <ClInclude Include="NetherNet\network\AsyncResolverFactory.hpp" />
     <ClInclude Include="NetherNet\network\ESendType.hpp" />
     <ClInclude Include="NetherNet\network\NetworkID.hpp" />
     <ClInclude Include="NetherNet\network\NetworkSessionManager.hpp" />

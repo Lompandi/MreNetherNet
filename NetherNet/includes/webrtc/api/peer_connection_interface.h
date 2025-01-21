@@ -499,6 +499,7 @@ class RTC_EXPORT PeerConnectionInterface : public webrtc::RefCountInterface {
     // Interval in milliseconds at which an ICE "backup" candidate pair will be
     // pinged. This is a candidate pair which is not actively in use, but may
     // be switched to if the active candidate pair becomes unusable.
+    // be switched to if the active candidate pair becomes unusable.
     //
     // This is relevant mainly to Wi-Fi/cell handoff; the application may not
     // want this backup cellular candidate pair pinged frequently, since it
