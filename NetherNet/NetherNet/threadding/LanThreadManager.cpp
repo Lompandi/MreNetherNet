@@ -60,7 +60,7 @@ namespace NetherNet {
 
 	bool LanThreadManager::IsBroadcastDiscoveryEnabled(NetworkID id) {
 		if (IsCurrent())
-			return (mBroadcastIdList.contains(id));
+			return (mIds.contains(id));
 
 		bool isEnabled = false;
 		BlockingCall([&]() {
@@ -75,24 +75,30 @@ namespace NetherNet {
 		}
 
 		DiscoveryRequestPacket disc_req_pkt(id);
+		if (!mDiscoveredAddresses.empty()) {
+			for (const auto& ip : mDiscoveredAddresses) {
+				NetherNet::NetherNetTransport_LogMessage(
+					NetherNet::LogSeverity::Information,
+					"[LAN] [%llu] sending broadcast request to %s",
+					id,
+					ip.ToString().c_str());
 
-		while (true) {
-			//TODO: Dont know if it is always the first address
-			std::string ipAddrStr = mAddressList.begin()->ToString();
-
-			::NetherNet::NetherNetTransport_LogMessage(
-				LogSeverity::Information,
-				"[LAN] [%llu] sending broadcast request to %s",
-				id,
-				ipAddrStr.data()
-			);
-
-			rtc::SocketAddress sockAddr(ipAddrStr, mConnPort);
-			auto SenderId = disc_req_pkt.SenderId();
-			auto result = SendToHelper(&disc_req_pkt, disc_req_pkt.PacketLength(), sockAddr);
-
-			if (!result) {
-				//TODO: process
+				auto length = disc_req_pkt.PacketLength();
+				//TODO
+				rtc::SocketAddress send_addr(ip, mEphemeralPort);
+				auto send_result = SendToHelper(&disc_req_pkt, length, send_addr);
+				auto value = send_result.value();
+				auto category = &send_result.category();
+				if (!value) {
+					//goto increment
+				}
+				NetherNet::NetherNetTransport_LogMessage(
+					NetherNet::LogSeverity::Warning,
+					"[LAN] sendto %s failed: %s (%d)",
+					send_addr.ToString().c_str(),
+					send_result.message().c_str(),
+					value);
+				//TODO
 			}
 		}
 	}
@@ -164,7 +170,7 @@ namespace NetherNet {
 			if (ShouldBeginNetworkDiscovery())
 				BeginNetworkDiscovery();
 			
-			for (const auto& addr : mBroadcastIdList) {
+			for (const auto& addr : mIds) {
 				SendLanBroadcastRequest(addr);
 			}
 			PostTask([&]() {
@@ -205,10 +211,12 @@ namespace NetherNet {
 	}
 
 	void LanThreadManager::DisableBroadcastDiscovery(NetworkID id) {
-		if (!IsCurrent())
+		if (!IsCurrent()) {
+			PostTask([&]() {DisableBroadcastDiscovery(id); });
 			return;
+		}
 		NetherNet::NetherNetTransport_LogMessage(LogSeverity::Information, "[LAN] removing [%llu] from set of broadcast ids", id);
-		mBroadcastIdList.erase(id);
+		mIds.erase(id);
 	}
 
 	//IPv6 multicast address with link-local scope (FF02::1)
@@ -217,10 +225,50 @@ namespace NetherNet {
 	void LanThreadManager::OnNetworkDiscoveryComplete() {
 		auto network_list = mBasicNetworkMgr->GetAnyAddressNetworks();
 		
+		std::set<rtc::IPAddress> broadcast_domain_list;
+
 		for (const auto& network : network_list) {
 			for (const auto& ip : network->GetIPs()) {
 				if (!rtc::IPIsLoopback(ip)) {
 					auto family = ip.family();
+					if (family == AF_INET) {
+						if (!rtc::IPIsLinkLocal(ip)) {
+							auto ip6_flags = ip.ipv6_flags();
+							in_addr ip4_addr;
+							ip4_addr.S_un.S_addr = ip.ipv4_address().S_un.S_addr;
+							rtc::IPAddress addr_add(_byteswap_ulong(ip4_addr.S_un.S_addr) | ~(-1 << -(char)ip6_flags));
+							NetherNet::NetherNetTransport_LogMessage(
+								NetherNet::LogSeverity::Information,
+								"[LAN] adding %s to broadcast domain",
+								addr_add.ToString().c_str());
+							broadcast_domain_list.insert(addr_add);
+
+						}
+					}
+					else if (family == AF_INET6 && mBindAddress.family() == AF_INET6) {
+						NetherNet::NetherNetTransport_LogMessage(
+							NetherNet::LogSeverity::Information,
+							"[LAN] adding %s to broadcast domain",
+							IPv6AllHostsLinkLocal.ToString().c_str());
+						broadcast_domain_list.insert(IPv6AllHostsLinkLocal);
+					}
+					NetherNet::NetherNetTransport_LogMessage(
+						NetherNet::LogSeverity::Information,
+						"[LAN] %s not viable for broadcast domain",
+						ip.ToString().c_str());
+				}
+			}
+
+			if(broadcast_domain_list.empty())
+				NetherNet::NetherNetTransport_LogMessage(
+					NetherNet::LogSeverity::Warning,
+					"[LAN] no viable networks found, we're likely offline");
+
+			NetherNet::NetherNetTransport_LogMessage(NetherNet::LogSeverity::Information, "[LAN] network discovery complete!");
+			std::swap(mDiscoveredAddresses, broadcast_domain_list);
+			broadcast_domain_list.clear();
+			/*
+
 					if (family == AF_INET6) {
 						if (mNetworkFamily != AF_INET6) {
 							//goto process
@@ -254,7 +302,7 @@ namespace NetherNet {
 						//TODO
 					}
 				}
-			}
+			}*/
 		}
 	}
 

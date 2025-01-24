@@ -65,9 +65,9 @@ namespace NetherNet {
 		std::unique_ptr<rtc::BasicNetworkManager>	mBasicNetworkMgr;	//this + 0x1D8
 		uint64_t									mEncryptionkey;		//this + 0x1E0
 		uint16_t									mEphemeralPort;		//this + 0x1E8 default port: 7551
-		std::set<NetworkID, std::less<NetworkID>>   mBroadcastIdList;	//this + 0x1F8
+		std::set<NetworkID>							mIds;				//this + 0x1F8
 		//TODO: std::set down here
-		std::set<rtc::IPAddress>					mAddressList;		//this + 0x208
+		std::set<rtc::IPAddress>					mDiscoveredAddresses; //this + 0x208
 		int											mConnPort;			//this + 0xF40
 	};
 

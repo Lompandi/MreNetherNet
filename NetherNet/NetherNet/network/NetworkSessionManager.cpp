@@ -5,12 +5,12 @@
 
 namespace NetherNet {
 	void NetworkSessionManager::ClearPacketData(NetworkID id) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		mPacketData.erase(id);
 	}
 
 	bool NetworkSessionManager::CloseSessionWithUser(NetworkID id) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		auto session_elem = mSessionList.find(id);
 
 		if (session_elem != mSessionList.end()) {
@@ -23,7 +23,7 @@ namespace NetherNet {
 	}
 
 	bool NetworkSessionManager::AcceptSessionWithUser(NetworkID id) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		auto session_elem = mSessionList.find(id);
 
 		if (session_elem != mSessionList.end()) {
@@ -61,7 +61,7 @@ namespace NetherNet {
 	}
 
 	bool NetworkSessionManager::GetSessionState(NetworkID id, SessionState* outState) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		auto current_session = GetCurrentSession(id);
 		if (current_session)
 			return current_session->GetSessionState(outState);
@@ -69,7 +69,7 @@ namespace NetherNet {
 	}
 
 	bool NetworkSessionManager::HasKnownConnection(NetworkID id) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		return mSessionList[id].mOwnSession != nullptr;
 	}
 
@@ -186,7 +186,7 @@ namespace NetherNet {
 
 	bool 
 	NetworkSessionManager::IsPacketAvailable(NetworkID id, uint32_t* mcbMessage) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		auto data_elem = mPacketData.find(id);
 
 		if (data_elem == mPacketData.end())
@@ -237,7 +237,7 @@ namespace NetherNet {
 
 	void 
 	NetworkSessionManager::ProcessError(NetworkID networkIDRemote, ESessionError err) {
-		std::lock_guard lock(mQueuedPacketsMutex);
+		std::lock_guard lock(mSessionCreationMutex);
 		auto cur_session = GetCurrentSession(networkIDRemote);
 		if (cur_session)
 			cur_session->ProcessError(err);
@@ -246,5 +246,14 @@ namespace NetherNet {
 	void 
 	NetworkSessionManager::RemoteMessageReceived(NetworkID id, void const* pdata, size_t size) {
 
+	}
+
+	int 
+	NetworkSessionManager::SendPacket(NetworkID id, const char* pbData, uint32_t cbData, ESendType send_type) {
+		std::lock_guard lock(mSessionCreationMutex);
+		auto current_session = GetCurrentSession(id);
+		if (current_session)
+			current_session->SendPacket(pbData, cbData, send_type);
+		return current_session != nullptr;
 	}
 }

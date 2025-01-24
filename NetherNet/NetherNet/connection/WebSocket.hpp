@@ -5,6 +5,7 @@
 #include <mutex>
 #include <functional>
 
+#include "IWebRTCSignalingInterface.hpp"
 #include "httpClient/httpClient.h"
 
 namespace NetherNet {
@@ -24,5 +25,9 @@ namespace NetherNet {
 		std::mutex	mOperationGuard;		//this+0x18
 		HCWebsocketHandle mWebSocketHandle;		//this+0x68
 
+	};
+
+	class WebSocketSignalingInterfaceImpl : public IWebRTCSignalingInterface {
+		//TODO
 	};
 }

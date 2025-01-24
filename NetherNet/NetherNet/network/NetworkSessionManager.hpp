@@ -49,6 +49,8 @@ namespace NetherNet {
 
 		bool OpenSessionWithUser(NetworkID id);
 
+		void PeriodicDeadSessionCleaup();
+
 		void ProcessSignal(
 			NetworkID remoteId,
 			ConnectError const& signal,
@@ -75,11 +77,14 @@ namespace NetherNet {
 
 		void ProcessError(NetworkID networkIDRemote, ESessionError err);
 
+		bool ReadPacket(NetworkID remoteId, void* pubDest, unsigned int cbDest, uint32_t* pcbMessageSize);
+
 		void RemoteMessageReceived(NetworkID id, void const* pdata, size_t size);
 
+		int SendPacket(NetworkID id, const char* pbData, uint32_t cbData, ESendType send_type);
 	public:
 		std::map<NetworkID, std::vector<uint8_t>>		mPacketData;				//this + 0x0
-		std::mutex										mQueuedPacketsMutex;		//this + 0x60
+		std::mutex										mSessionCreationMutex;		//this + 0x60
 		std::map<NetworkID, NetworkSessionRecord>		mSessionList;				//this + 0xB0
 		SimpleNetworkInterfaceImpl*						mSimpleNetworkInterface;	//this + 0xC0
 	};

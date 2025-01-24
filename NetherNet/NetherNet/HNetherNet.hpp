@@ -24,6 +24,7 @@
 #include "network/packets/DiscoveryMessagePacket.hpp"
 #include "network/packets/DiscoveryRequestPacket.hpp"
 #include "network/packets/DiscoveryResponsePacket.hpp"
+#include <random>
 
 namespace NetherNet {
 	ErrorOr<std::vector<uint8_t>, std::error_code> CreateKey(uint64_t id);
@@ -41,6 +42,14 @@ namespace NetherNet {
 	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryMessagePacket const& packet);
 	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryRequestPacket const& packet);
 	void HandleDiscoveryPacketOnSignalThread(rtc::SocketAddress& addr, DiscoveryResponsePacket& packet);
+
+	NetworkID CreateID() {
+		std::random_device rd;
+		std::mt19937_64 mt(rd());
+
+		std::uniform_int_distribution<NetworkID> dist;
+		return dist(mt);
+	}
 
 	extern LogSeverity g_LogServerity;
 }

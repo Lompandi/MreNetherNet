@@ -10,6 +10,7 @@
 #include "../network/packets/ESessionError.hpp"
 #include "../network/signaling/ConnectResponse.hpp"
 #include "NetworkSession.hpp"
+#include "WebSocket.hpp"
 
 namespace NetherNet {
 	void SimpleNetworkInterfaceImpl::EnableSignalingOverLAN() {
@@ -54,12 +55,12 @@ namespace NetherNet {
 		}
 	}
 
-	void SimpleNetworkInterfaceImpl::ClearPacketData(NetworkID id) {
+	void SimpleNetworkInterfaceImpl::ClearPacketData(NetworkID id) const {
 		mNetworkSessionMgr->ClearPacketData(id);
 	}
 
-	uint32_t 
-	SimpleNetworkInterfaceImpl::GetConnectionFlags(NetworkID remoteId) {
+	uint32_t
+		SimpleNetworkInterfaceImpl::GetConnectionFlags(NetworkID remoteId) {
 		if (!mCallBack)
 			return 0;
 
@@ -68,8 +69,8 @@ namespace NetherNet {
 		return flag;
 	}
 
-	bool 
-	SimpleNetworkInterfaceImpl::GetSessionState(NetworkID remoteId, SessionState* pConnState) {
+	bool
+		SimpleNetworkInterfaceImpl::GetSessionState(NetworkID remoteId, SessionState* pConnState) {
 		std::lock_guard lock(mApiLevelMutex);
 		if (mReceiverId == remoteId)
 			return false;
@@ -94,7 +95,7 @@ namespace NetherNet {
 		}
 	}
 
-	void SimpleNetworkInterfaceImpl::ReceiveFromLanSignalingChannel(NetworkID remoteId, const std::string& message, bool a3, SignalingChannelId channelId) {
+	void SimpleNetworkInterfaceImpl::ReceiveFromSignalingChannel(NetworkID remoteId, const std::string& message, bool a3, SignalingChannelId channelId) {
 		::NetherNet::NetherNetTransport_LogMessage(
 			LogSeverity::Information,
 			"received signal from [%llu]: %s",
@@ -244,11 +245,11 @@ namespace NetherNet {
 	}
 
 	void SimpleNetworkInterfaceImpl::ReceiveFromLanSignalingChannel(NetworkID remoteId, std::string const& data) {
-		ReceiveFromLanSignalingChannel(remoteId, data, false, SignalingChannelId::Lan);
+		ReceiveFromSignalingChannel(remoteId, data, false, SignalingChannelId::Lan);
 	}
 
 	void SimpleNetworkInterfaceImpl::ReceiveFromWebSocketSignalingChannel(NetworkID remoteId, std::string const& data, bool a3) {
-		ReceiveFromLanSignalingChannel(remoteId, data, a3, SignalingChannelId::WebSocket);
+		ReceiveFromSignalingChannel(remoteId, data, a3, SignalingChannelId::WebSocket);
 	}
 
 	void SimpleNetworkInterfaceImpl::NotifyOnSessionOpen(NetworkID id) {
@@ -268,7 +269,7 @@ namespace NetherNet {
 	void SimpleNetworkInterfaceImpl::ProcessTurnConfig(const std::string& config) {
 		auto signal_thread = getSignalThread();
 		auto rtc_thread = signal_thread->LoadRtcThread();
-		
+
 		if (rtc_thread == nullptr)
 			return;
 
@@ -377,7 +378,7 @@ namespace NetherNet {
 					ice_server.username.c_str(),
 					ice_server.password.c_str());
 			}
-		});
+			});
 	}
 
 	void SimpleNetworkInterfaceImpl::ProcessSessionError(NetworkID remoteId, ESessionError err) const {
@@ -389,20 +390,20 @@ namespace NetherNet {
 		return mNetworkSessionMgr->CloseSessionWithUser(id);
 	}
 
-	void 
-	SimpleNetworkInterfaceImpl::DisableBroadcastDiscovery() const {
+	void
+		SimpleNetworkInterfaceImpl::DisableBroadcastDiscovery() const {
 		auto& lan_thread = getLanThread();
 		lan_thread.DisableBroadcastDiscovery(mReceiverId);
 	}
 
-	void 
-	SimpleNetworkInterfaceImpl::EnableBroadcastDiscovery() const {
+	void
+		SimpleNetworkInterfaceImpl::EnableBroadcastDiscovery() const {
 		auto& lan_thread = getLanThread();
 		lan_thread.EnableBroadcastDiscovery(mReceiverId);
 	}
 
-	void 
-	SimpleNetworkInterfaceImpl::Initialize() {
+	void
+		SimpleNetworkInterfaceImpl::Initialize() {
 		mNetworkSessionMgr
 			= std::make_unique<NetworkSessionManager>(this);
 
@@ -413,4 +414,189 @@ namespace NetherNet {
 			//TODO
 		}
 	}
+
+	//TODO
+	void
+		SimpleNetworkInterfaceImpl::MakeDefaultSignalingChannel(NetherNetTransportServerConfiguration const* config) {
+		auto addr_count = config->KnownMappedAddressCount;
+		if (addr_count) {
+			if (addr_count - 1 >= 2)
+				NetherNet::NetherNetTransport_LogMessage(NetherNet::LogSeverity::Error, "Unhandled signaling host %u", addr_count);
+		}
+		else {
+			mpWebRTCSignalingInterface = std::make_shared<NetherNet::WebSocketSignalingInterfaceImpl>();
+		}
+		RegisterSignalingChannelCallbacks();
+	}
+
+	bool
+		SimpleNetworkInterfaceImpl::OpenSessionWithUser(NetworkID remoteId) {
+		std::lock_guard lock(mApiLevelMutex);
+		auto result = mNetworkSessionMgr->OpenSessionWithUser(remoteId);
+		return result;
+	}
+
+	void
+		SimpleNetworkInterfaceImpl::PeriodicUpdateOnSignalThread() {
+		if (mpWebRTCSignalingInterface.get() != nullptr) {
+			mpWebRTCSignalingInterface->Update();
+		}
+
+		if (mApiLevelMutex.try_lock()) {
+			mNetworkSessionMgr->PeriodicDeadSessionCleaup();
+			mApiLevelMutex.unlock();
+		}
+	}
+
+	bool
+		SimpleNetworkInterfaceImpl::ReadPacket(NetworkID id, void* pubDest, unsigned int cbDest, unsigned int* pcbMessageSize) {
+		std::lock_guard lock(mApiLevelMutex);
+		auto result =
+			mNetworkSessionMgr->ReadPacket(id, pubDest, cbDest, pcbMessageSize);
+		return result;
+	}
+
+	void
+	SimpleNetworkInterfaceImpl::RegisterSignalingChannelCallbacks() {
+		if (mpWebRTCSignalingInterface.get() == nullptr)
+			return;
+
+		//TODO
+	}
+
+	int
+	SimpleNetworkInterfaceImpl::SendPacket(NetworkID remoteId, const char* pbdata, uint32_t cbData, ESendType sendType) {
+		std::lock_guard lock(mApiLevelMutex);
+
+		if (cbData >= 1197 && sendType == eSendTypeUnreliable) {
+			NetherNet::NetherNetTransport_LogMessage(NetherNet::LogSeverity::Error,
+				"[%llu] Attempting to send unreliable packet greater than MTU size, failing. (%d > %d)",
+				remoteId,
+				cbData,
+				1196);
+			return 0;
+		}
+
+		if (cbData >= 15361 && sendType == NetherNet::ESendType::eSendTypeReliable) {
+			NetherNet::NetherNetTransport_LogMessage(LogSeverity::Error,
+				"[%llu] Attempting to send reliable packet greater than MTU size, failing. (%d > %d)",
+				remoteId,
+				cbData,
+				15360);
+			return 0;
+		}
+
+		auto lan_thread = &getLanThread();
+		if (mReceiverId == remoteId) {
+			mNetworkSessionMgr->RemoteMessageReceived(remoteId, pbdata, cbData);
+			return 1;
+		}
+		else if (mNetworkSessionMgr->HasKnownConnection(remoteId)
+			|| lan_thread->IsNetworkIdOnLan(remoteId)
+			|| mpWebRTCSignalingInterface != nullptr
+			&& mpWebRTCSignalingInterface->IsSignedIn()) {
+			return mNetworkSessionMgr->SendPacket(remoteId, pbdata, cbData, sendType);
+		}
+		return 0;
+	}
+
+	void
+	SimpleNetworkInterfaceImpl::SetServerConfiguration(NetherNetTransportServerConfiguration const* config) {
+		std::lock_guard lock(mApiLevelMutex);
+		webrtc::PeerConnectionInterface::RTCConfiguration config_out;
+		InitializeConfiguration(config, &config_out);
+		auto signal_thread = getSignalThread();
+		auto rtc_thread = signal_thread->LoadRtcThread();
+		if (rtc_thread) {
+			rtc_thread->PostTask([&]() {
+				mRtcConfig = config_out;
+				});
+		}
+	}
+
+	void
+	SimpleNetworkInterfaceImpl::SetWebRTCSignalingInterface(std::shared_ptr<IWebRTCSignalingInterface> const& webrtc_interface) {
+		mpWebRTCSignalingInterface = webrtc_interface;
+		RegisterSignalingChannelCallbacks();
+	}
+
+	int
+	SimpleNetworkInterfaceImpl::SendToSignalingChannel(NetworkID remoteId, SignalingMessage message, std::optional<SignalingChannelId> preference, std::function<void(std::error_code)>&& onComplete) {
+
+		//TODO
+
+		std::pair<uint64_t, std::string> msg_data;
+
+		bool disable_lan_signal = mDisableLANSignaling;
+		auto lan_thread = &getLanThread();
+		if (!disable_lan_signal && lan_thread->IsNetworkIdOnLan(remoteId)) {
+			bool is_ws = (preference && preference.value() != SignalingChannelId::Lan);
+			if (!is_ws) {
+				lan_thread->SendSignalingMessageTo(
+					mReceiverId,
+					remoteId,
+					msg_data.second,
+					std::move(onComplete)
+				);
+			}
+		}
+	}
+
+	void 
+	SimpleNetworkInterfaceImpl::NotifyOnSessionRequested(NetworkID id) {
+		if (mCallBack) {
+			mCallBack->OnSessionRequested(id);
+			return;
+		}
+		CloseSessionWithUser(id);
+	}
+
+	void 
+	SimpleNetworkInterfaceImpl::SignIntoSignalingService(
+		IWebRTCSignalingInterface::SignInCallback const& signInCallback,
+		IWebRTCSignalingInterface::ConnectionStatusChangedCallback const& connectionStatusChangedCallback,
+		IWebRTCSignalingInterface::SignalingConfiguration const& signalingConfig
+	) {
+		webrtc::PeerConnectionInterface::IceServers ice_server_list;
+
+		auto& sig_config = signalingConfig;
+		auto& stat_change_callback = connectionStatusChangedCallback;
+
+		if (signalingConfig.StunServer != nullptr) {
+			webrtc::PeerConnectionInterface::IceServer iceServer;
+			iceServer.uri = sig_config.StunServer;
+			ice_server_list.push_back(iceServer);
+		}
+
+		if (sig_config.TurnServer != nullptr) {
+			webrtc::PeerConnectionInterface::IceServer iceServer;
+			iceServer.uri = sig_config.TurnServer;
+			ice_server_list.push_back(iceServer);
+		}
+
+		auto signal_thread = getSignalThread();
+		auto rtc_thread = signal_thread->LoadRtcThread();
+		if (rtc_thread) {
+			rtc_thread->PostTask([&]() {
+				if (!mRtcConfig.servers.empty()) {
+					mRtcConfig.servers.clear();
+				}
+				mRtcConfig.servers = ice_server_list;
+			});
+		}
+
+		if (mpWebRTCSignalingInterface.get() != nullptr)
+			mpWebRTCSignalingInterface->SignIn(signInCallback, connectionStatusChangedCallback, signalingConfig);
+		else if (signInCallback) {
+			signInCallback();//TODO
+		}
+	}
+
+	void 
+	SimpleNetworkInterfaceImpl::SignOutFromSignalingService() {
+		if (mpWebRTCSignalingInterface.get())
+			mpWebRTCSignalingInterface->SignOut();
+	}
+
+
 }

@@ -59,7 +59,6 @@ namespace NetherNet {
 		bool IsDeadSession(std::chrono::seconds negotiationTimeout);
 		bool IsInactiveSession();
 
-
 		void OnConnectionChange(webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
 		void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> iface) override;
 		void OnDataChannelMessage(webrtc::DataChannelInterface* iface, webrtc::DataBuffer const& data) ;
@@ -68,15 +67,23 @@ namespace NetherNet {
 		void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
 		void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state) override;
 		void OnStatsRequestComplete(std::vector<webrtc::StatsReport const*> const& reports);;
+		
 		void ProcessError(ESessionError err);
+		
 		void ProcessIceCandidates();
 
+		void ProcessSignal(CandidateAdd const& signal);
+		
+		void ProcessSignal(ConnectResponse const& signal);
+
 		void SendPacket(const char* pdata, uint32_t cbdata, ::NetherNet::ESendType send_type);
+		
 		void SendToSignalingChannel(std::variant<ConnectRequest, ConnectResponse, ConnectError, CandidateAdd> const& sigvar);
+		
 		void TrySendSessionResponse();
 
-
 		void UpdateDataChannelStates();
+		
 		void UpdateSessionActivity();
 	private:
 		ENegotiationState						mConnNegotiationState;					//this + 0x08

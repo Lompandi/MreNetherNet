@@ -10,7 +10,7 @@ namespace NetherNet {
 		virtual void  OnSessionGetConnectionFlags(NetworkID remoteId, uint32_t* out_flag) = 0;
 
 		// vIndex: 1 (+8)
-		virtual bool OnSessionRequested(NetworkID remoteId, uint64_t sessionId) = 0;
+		virtual bool OnSessionRequested(NetworkID remoteId) = 0;
 		
 		// vIndex: 2 (+16)
 		virtual void  OnSessionOpen(::NetherNet::NetworkID networkId) = 0;
