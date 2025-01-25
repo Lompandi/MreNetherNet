@@ -111,7 +111,7 @@ namespace NetherNet {
 
 		int SendPacket(NetworkID remoteId, const char* pbdata, uint32_t cbData, ESendType sendType);
 
-		int SendToSignalingChannel(NetworkID remoteId, SignalingMessage message, std::optional<SignalingChannelId> preference, std::function<void(std::error_code)>&& onComplete);
+		ESessionError SendToSignalingChannel(NetworkID remoteId, SignalingMessage message, std::optional<SignalingChannelId> preference, std::function<void(std::error_code)>&& onComplete);
 
 		void SetServerConfiguration(NetherNetTransportServerConfiguration const* config);
 

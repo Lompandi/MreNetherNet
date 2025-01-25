@@ -41,10 +41,15 @@ namespace NetherNet {
 			webrtc::PeerConnectionObserver() {};
 
 		void AcceptSession();
+		
 		void ApplyConnectionFlags(webrtc::PeerConnectionInterface::RTCConfiguration* config, uint32_t flag);
+		
 		void CheckSendDeferredData();
+		
 		void CheckUpdateStats();
+		
 		void Close();
+		
 		bool GetSessionState(SessionState* outState);
 
 		void InitializeIncoming(
@@ -53,19 +58,29 @@ namespace NetherNet {
 			std::unique_ptr<webrtc::SessionDescriptionInterface> pSessionDesc,
 			SignalingChannelId  preference
 		);
+
 		void InitializeOutgoing(NetworkID remoteID);
 
 		bool IsConnectionAlive() const;
+		
 		bool IsDeadSession(std::chrono::seconds negotiationTimeout);
+		
 		bool IsInactiveSession();
 
 		void OnConnectionChange(webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
+		
 		void OnDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> iface) override;
+		
 		void OnDataChannelMessage(webrtc::DataChannelInterface* iface, webrtc::DataBuffer const& data) ;
+		
 		void OnDataChannelStateChange(webrtc::DataChannelInterface* iface);
+		
 		void OnIceCandidate(webrtc::IceCandidateInterface const* iface) override;
+		
 		void OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state) override;
+		
 		void OnIceGatheringChange(webrtc::PeerConnectionInterface::IceGatheringState new_state) override;
+		
 		void OnStatsRequestComplete(std::vector<webrtc::StatsReport const*> const& reports);;
 		
 		void ProcessError(ESessionError err);

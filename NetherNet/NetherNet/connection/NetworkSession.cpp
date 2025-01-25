@@ -357,11 +357,13 @@ namespace NetherNet {
 	}
 
 	void NetworkSession::Close() {
-		if (mpPeerConnection.get() != nullptr) {
+		if (mpPeerConnection) {
 			auto signal_thread = getSignalThread();
 			auto rtc_thread = signal_thread->LoadRtcThread();
 			if (rtc_thread) {
-				//TODO
+				rtc_thread->PostTask([&]() {
+					mpPeerConnection->Close();
+				});
 			}
 		}
 	}
@@ -524,8 +526,20 @@ namespace NetherNet {
 		auto remoteId = mRemoteID;
 		auto pNetworkInterface = mNetworkSessionMgr->mSimpleNetworkInterface;
 
-		//auto send_result = pNetworkInterface
-			//->SendToSignalingChannel()
+		auto send_reult = mNetworkSessionMgr->mSimpleNetworkInterface
+			->SendToSignalingChannel(remoteId, sigvar, mSignalingPreference,
+				[&](std::error_code) {
+					mNetworkSessionMgr->mSimpleNetworkInterface
+						->NotifyOnSessionClose(remoteId, ESessionError::ESessionErrorSignalingFailedToSend);
+				});
+
+		if (send_reult != ESessionError::ESessionErrorNone) {
+			mNetworkSessionMgr->mSimpleNetworkInterface
+				->NotifyOnSessionClose(
+					remoteId,
+					send_reult
+				);
+		}
 	}
 
 	void NetworkSession::OnDataChannelMessage(webrtc::DataChannelInterface* iface, webrtc::DataBuffer const& data) {

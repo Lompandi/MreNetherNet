@@ -10,12 +10,11 @@
 
 namespace NetherNet {
 	class WebSocket {
-		
-
+	public:
 		HCWebsocketHandle AllocateSocket();
 		void Connect(std::string const& uri, std::vector<std::pair<std::string, std::string>> const& headers, std::function<void(std::error_code)>&& onComplete);
 		void Disconnect();
-		bool IsConnected();
+		bool IsConnected() const;
 		void Send(std::string const& message, std::function<void(std::error_code)>&& onComplete);
 
 		static long DeallocateSocket(HCWebsocketHandle socket);

@@ -2,8 +2,7 @@
 #include "WebSocket.hpp"
 
 namespace NetherNet {
-	bool WebSocket::IsConnected() {
-		std::lock_guard<std::mutex> lock(mOperationGuard);
+	bool WebSocket::IsConnected() const {
 		return mWebSocketHandle != nullptr;
 	}
 
@@ -50,8 +49,10 @@ namespace NetherNet {
 	}
 
 	void WebSocket::DeallocateSocketAsync(HCWebsocketHandle socket) {
-
-	}
+		if (HCWebSocketGetEventFunctions(socket, nullptr, nullptr, nullptr, nullptr) >= 0) {
+			HCWebSocketCloseHandle(socket);
+		}
+	} 
 
 	long WebSocket::DeallocateSocket(HCWebsocketHandle handle) {
 		if(!handle)
@@ -71,11 +72,12 @@ namespace NetherNet {
 	}
 
 	void WebSocket::Disconnect() {
-		std::lock_guard<std::mutex> lock(mOperationGuard);
+		mOperationGuard.lock();
+		auto m_handle = mWebSocketHandle;
+		mWebSocketHandle = nullptr;
+		mOperationGuard.unlock();
 
-		//TODO: Clear data??
-
-		if (mWebSocketHandle) {
+		if (m_handle) {
 			HCWebSocketDisconnect(mWebSocketHandle);
 			WebSocket::DeallocateSocketAsync(mWebSocketHandle);
 		}
